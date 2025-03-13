@@ -1,14 +1,16 @@
+package frc.robot.subsystems.swervedrive;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class LimelightTest {
+public class LimelightTest extends SubsystemBase{
     private NetworkTable limelightTable;
 
-    @Override
-    public void robotInit() {
+    public LimelightTest() {
         // Get the NetworkTable for the Limelight
         limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
 
@@ -27,7 +29,7 @@ public class LimelightTest {
     }
 
     @Override
-    public void teleopPeriodic() {
+    public void periodic() {
         // Update Shuffleboard with the current stream URL
         String streamUrl = "http://172.29.1.1/";
         SmartDashboard.putString("Limelight Stream URL", streamUrl);

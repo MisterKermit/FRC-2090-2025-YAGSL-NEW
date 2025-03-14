@@ -1,71 +1,114 @@
-// package frc.robot;
+package frc.robot.subsystems;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 
+import org.dyn4j.dynamics.joint.WheelJoint;
 
-// import static edu.wpi.first.units.Units.Meters;
-// import static edu.wpi.first.units.Units.Rotations;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkLimitSwitch;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-// import edu.wpi.first.units.measure.Angle;
-// import edu.wpi.first.units.measure.Distance;
-// import frc.robot.Constants.ArmConstants;
-// import frc.robot.Constants.ElevatorConstants;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
-// public class RobotMath
-// {
+public class Hang extends TimedRobot {
+  private SparkMax motor;
+  private SparkMaxConfig motorConfig;
+  private SparkLimitSwitch forwardLimitSwitch;
+  private SparkLimitSwitch reverseLimitSwitch;
+  private RelativeEncoder encoder;
 
-//   public static class Arm
-//   {
+  public void Robot() {
+    /*
+     * Initialize the SPARK MAX and get its limit switch and encoder objects for
+     * later use.
+     */
+    
+    SparkMax Hang1 = new SparkMax(18, MotorType.kBrushless);
+    SparkMax Hang2 = new SparkMax(19, MotorType.kBrushless);
+    RelativeEncoder encoder1 = Hang1.getEncoder();
+    RelativeEncoder encoder2 = Hang2.getEncoder();
+    /*
+     * Create a new SPARK MAX configuration object. This will store the
+     * configuration parameters for the SPARK MAX that we will set below.
+     */
+    SparkMaxConfig Hang1config = new SparkMaxConfig();
+    SparkMaxConfig Hang2config = new SparkMaxConfig();
+    // Set the idle mode to brake to stop immediately when reaching a limit
+    Hang1config.idleMode(IdleMode.kBrake);
+    Hang2config.idleMode(IdleMode.kBrake);
+    // Enable limit switches to stop the motor when they are closed
+    Hang1config.limitSwitch
+        .forwardLimitSwitchType(Type.kNormallyOpen)
+        .forwardLimitSwitchEnabled(true)
+        .reverseLimitSwitchType(Type.kNormallyOpen)
+        .reverseLimitSwitchEnabled(true);
+    Hang2config.limitSwitch
+        .forwardLimitSwitchType(Type.kNormallyOpen)
+        .forwardLimitSwitchEnabled(true)
+        .reverseLimitSwitchType(Type.kNormallyOpen)
+        .reverseLimitSwitchEnabled(true);
 
-//     /**
-//      * Convert {@link Angle} into motor {@link Angle}
-//      *
-//      * @param measurement Angle, to convert.
-//      * @return {@link Angle} equivalent to rotations of the motor.
-//      */
-//     public static Angle convertAngleToSensorUnits(Angle measurement)
-//     {
-//       return Rotations.of(measurement.in(Rotations) * ArmConstants.kArmReduction);
-//     }
+    // Set the soft limits to stop the motor at -50 and 50 rotations
+    motorConfig.softLimit
+        .forwardSoftLimit(30)
+        .forwardSoftLimitEnabled(true)
+        .reverseSoftLimit(-30)
+        .reverseSoftLimitEnabled(true);
 
-//     /**
-//      * Convert motor rotations {@link Angle} into usable {@link Angle}
-//      *
-//      * @param measurement Motor roations
-//      * @return Usable angle.
-//      */
-//     public static Angle convertSensorUnitsToAngle(Angle measurement)
-//     {
-//       return Rotations.of(measurement.in(Rotations) / ArmConstants.kArmReduction);
+    /*
+     * Apply the configuration to the SPARK MAX.
+     *
+     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
+     * is useful in case the SPARK MAX is replaced.
+     *
+     * kPersistParameters is used to ensure the configuration is not lost when
+     * the SPARK MAX loses power. This is useful for power cycles that may occur
+     * mid-operation.
+     */
+    Hang1.configure(Hang1config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    Hang2.configure(Hang2config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-//     }
+    // Reset the position to 0 to start within the range of the soft limits
+    encoder1.setPosition(0);
+    encoder2.setPosition(0);
+    // Initialize dashboard values
+    SmartDashboard.setDefaultBoolean("Direction", true);
+  }
+
+  @Override
+  public void robotPeriodic() {
+    // Display data from SPARK onto the dashboard
+    SmartDashboard.putBoolean("Forward Limit Reached", forwardLimitSwitch.isPressed());
+    SmartDashboard.putBoolean("Reverse Limit Reached", reverseLimitSwitch.isPressed());
+    SmartDashboard.putNumber("Applied Output", motor.getAppliedOutput());
+    SmartDashboard.putNumber("Position", encoder.getPosition());
+  }
+
+//   public Command hangCommand(CommandXboxController controller) {
+//     return new hangCommand(this, controller);
 //   }
 
-//   public static class Elevator
-//   {
+  @Override
+  public void teleopInit() {
 
-//     /**
-//      * Convert {@link Distance} into {@link Angle}
-//      *
-//      * @param distance Distance, usually Meters.
-//      * @return {@link Angle} equivalent to rotations of the motor.
-//      */
-//     public static Angle convertDistanceToRotations(Distance distance)
-//     {
-//       return Rotations.of(distance.in(Meters) /
-//                           (ElevatorConstants.kElevatorDrumRadius * 2 * Math.PI) *
-//                           ElevatorConstants.kElevatorGearing);
-//     }
+  }
 
-//     /**
-//      * Convert {@link Angle} into {@link Distance}
-//      *
-//      * @param rotations Rotations of the motor
-//      * @return {@link Distance} of the elevator.
-//      */
-//     public static Distance convertRotationsToDistance(Angle rotations)
-//     {
-//       return Meters.of((rotations.in(Rotations) / ElevatorConstants.kElevatorGearing) *
-//                        (ElevatorConstants.kElevatorDrumRadius * 2 * Math.PI));
-//     }
-
-//   }
-// }
+  @Override
+  public void teleopPeriodic() {
+    // Set the motor setpoint based on the direction from the dashboard
+    // if (SmartDashboard.getBoolean("Direction", true)) {
+    //   motor.set(0.2);
+    // } else {
+    //   motor.set(-0.2);
+    
+    // }
+    
+  }
+}

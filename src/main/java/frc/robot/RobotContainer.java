@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevationTarget;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
@@ -41,6 +42,8 @@ public class RobotContainer
                                                                                 "swerve/falcon"));
 
   private final ElevatorSubsystem     elevator   = new ElevatorSubsystem();
+
+  private final VisionSubsystem       vision     = new VisionSubsystem("limelight");
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
@@ -124,13 +127,15 @@ public class RobotContainer
     Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
     Command driveSetpointGenKeyboard = drivebase.driveWithSetpointGeneratorFieldRelative(
         driveDirectAngleKeyboard);
+    Command ManualControlElevator = elevator.manualElevationCommand(driverXbox);
 
     if (RobotBase.isSimulation())
     {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
     } else
     {
-      drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+      // drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+      elevator.setDefaultCommand(ManualControlElevator);
     }
 
     if (Robot.isSimulation())

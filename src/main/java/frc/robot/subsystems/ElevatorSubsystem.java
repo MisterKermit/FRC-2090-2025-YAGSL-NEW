@@ -28,9 +28,9 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 public class ElevatorSubsystem extends SubsystemBase {
   private static final double MAX_VOLTAGE = 3.0;
   private static final double JOYSTICK_DEADBAND = 0.12;
-  private static final double MAX_HEIGHT_INCHES = 40.298;
+  private static final double MAX_HEIGHT_INCHES = 23;
   private static final double MIN_HEIGHT_INCHES = 0;
-  private static double ELEVATION_GEAR_RATIO = 6.4 / (1.757 * Math.PI * 2) ;
+  private static double ELEVATION_GEAR_RATIO = 4;
 
   // We have two Falcon 500s
   // TODO: Specify CAN IDss
@@ -56,15 +56,15 @@ public class ElevatorSubsystem extends SubsystemBase {
     Elevator_Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = MIN_HEIGHT_INCHES;
     
     Elevator_Config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    Elevator_Config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    Elevator_Config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     
     Elevator_Config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
     Elevator_Config.Feedback.SensorToMechanismRatio = ELEVATION_GEAR_RATIO;
 
-    Elevator_Config.Slot0.kG = 0.2; //0.3
-    Elevator_Config.Slot0.kS = 0.05; //0.4
-    Elevator_Config.Slot0.kV = 0.02; //0.001
-    Elevator_Config.Slot0.kA = 0.001; //0.0
+    Elevator_Config.Slot0.kG = 0.3; //0.3
+    Elevator_Config.Slot0.kS = 0.4; //0.4
+    Elevator_Config.Slot0.kV = 0.001; //0.001
+    Elevator_Config.Slot0.kA = 0.0; //0.0
     Elevator_Config.Slot0.kP = 0.5; //0.5
     Elevator_Config.Slot0.kI = 0.0;
     Elevator_Config.Slot0.kD = 0.0;
@@ -87,8 +87,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     topMotorFollower.getConfigurator().apply(Elevator_Config);
     // TODO: Use a non-deprecated method
     // Invert the left motor
-    leftMotorFollower.setControl(new Follower(rightMotorLeader.getDeviceID(), true));
-    topMotorFollower.setControl(new Follower(rightMotorLeader.getDeviceID(), true));
+    leftMotorFollower.setControl(new Follower(rightMotorLeader.getDeviceID(), false));
+    topMotorFollower.setControl(new Follower(rightMotorLeader.getDeviceID(), false));
     // leftMotorFollower.setInverted(true);
     voltageRequest = new VoltageOut(0);
     motionRequest = new MotionMagicVoltage(0);
@@ -138,7 +138,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
     @Override
     public void end(boolean isInterrupted) {
-      //setPosition(getElevatorPosition());
+      setPosition(getElevatorPosition());
     }
 
     @Override
@@ -187,7 +187,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override // every 20ms
     public void execute() {
-      double input = -controller.getLeftY();
+      double input = -controller.getLeftY() / 2;
       if (Math.abs(input) > JOYSTICK_DEADBAND) {
         targetPosition = targetPosition + input;
       }

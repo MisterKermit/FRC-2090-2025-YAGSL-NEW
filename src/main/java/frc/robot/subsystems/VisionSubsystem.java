@@ -1,29 +1,87 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+package frc.robot.subsystems;
 
-package frc.robot;
+//FIRST Library imports
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Pose2d;
 
-import edu.wpi.first.wpilibj.RobotBase;
+//Limelight library imports
+import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.LimelightResults;
 
-/**
- * Do NOT add any static variables to this class, or any initialization at all. Unless you know what you are doing, do
- * not modify this file except to change the parameter class to the startRobot call.
+//NavX library imports
+import com.studica.frc.AHRS;
+
+//Base java imports
+import java.util.concurrent.locks.ReentrantLock;
+
+/*
+ * This subsystem handles using the limelight camera to update the robot's estimated
+ * position on the field
+ * 
+ * Systems/subsystems that want to use the information should run the "GetLLPos()" function
+ * to safely access the data
+ * 
+ * The periodic function is what is used to upate the estimated position using the limelight
  */
-public final class Main
-{
+public class VisionSubsystem extends SubsystemBase{
 
-  private Main()
-  {
-  }
+    //Field-oriented pose estimate:
+    private LimelightHelpers.PoseEstimate m_FieldPose;
 
-  /**
-   * Main initialization function. Do not perform any initialization here.
-   *
-   * <p>If you change your main robot class, change the parameter type.
-   */
-  public static void main(String... args)
-  {
-    RobotBase.startRobot(Robot::new);
-  }
+    //Memory lock to prevent race conditions
+    private ReentrantLock lock = new ReentrantLock();
+
+    private final String LL_NAME;
+    //Gyro
+    private AHRS navX = new AHRS(AHRS.NavXComType.kMXP_SPI, AHRS.NavXUpdateRate.k50Hz);
+
+    //Constructor
+    public VisionSubsystem(String LimelightName){
+        LL_NAME = LimelightName;
+        LimelightHelpers.setPipelineIndex(LL_NAME, 0);
+        navX.zeroYaw();
+    }
+    
+    //On the periodic cycle (20ms), update the field pose estimate
+    @Override
+    public void periodic() {
+        double heading = navX.getAngle();
+        SmartDashboard.putNumber("Heading", heading);
+        LimelightHelpers.SetRobotOrientation(LL_NAME, heading, 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate newEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LL_NAME);
+        lock.lock();
+        m_FieldPose = newEstimate;
+        lock.unlock();
+        if(newEstimate == null){
+            //If here, camera is not ready, do nothing
+            SmartDashboard.putString("LL Status", "No estimate!");
+            return;
+        }
+        SmartDashboard.putString(LL_NAME + " status", "Generating estimates...");
+        //Code below is for data display purposes only
+        SmartDashboard.putNumber("VisionPose_X", newEstimate.pose.getX());
+        SmartDashboard.putNumber("VisionPose_Y", newEstimate.pose.getY());
+        SmartDashboard.putNumber("Number of detected tags", newEstimate.rawFiducials.length);
+        String detectedTagIDs = new String();
+        for(int i = 0; i < newEstimate.rawFiducials.length; i++){
+            detectedTagIDs = detectedTagIDs + ", " + String.valueOf(newEstimate.rawFiducials[i].id);
+            if(newEstimate.rawFiducials[i].id == 1){
+                LimelightHelpers.RawFiducial dudTag = newEstimate.rawFiducials[i];
+                SmartDashboard.putNumber("Dud tag horizontal offset", dudTag.txnc);
+                SmartDashboard.putNumber("Dud tag vertical offset", dudTag.tync);
+            }
+        }
+        //SmartDashboard.putNumberArray("Detected Tag IDs", detectedTagIDs);
+        SmartDashboard.putString("Detected tag IDs", detectedTagIDs);
+    }
+
+    //Use this function to fetch the current pose of the robot estimated by limelight
+    public LimelightHelpers.PoseEstimate GetVisionEstimate(){
+        LimelightHelpers.PoseEstimate updatedEstimate;
+        lock.lock();
+        updatedEstimate = m_FieldPose;
+        lock.unlock();
+        return updatedEstimate;
+    }
 }

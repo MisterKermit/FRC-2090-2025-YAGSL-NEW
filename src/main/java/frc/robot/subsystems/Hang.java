@@ -2,9 +2,6 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-
-import org.dyn4j.dynamics.joint.WheelJoint;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkMax;
@@ -12,103 +9,139 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
-public class Hang extends TimedRobot {
-  private SparkMax motor;
-  private SparkMaxConfig motorConfig;
-  private SparkLimitSwitch forwardLimitSwitch;
-  private SparkLimitSwitch reverseLimitSwitch;
-  private RelativeEncoder encoder;
+public class Hang extends SubsystemBase {
+  private final SparkMax hang1;
+  private final SparkMax hang2;
+  private final RelativeEncoder encoder1;
+  private final RelativeEncoder encoder2;
+  private final SparkLimitSwitch forwardLimitSwitch;
+  private final SparkLimitSwitch reverseLimitSwitch;
 
-  public void Robot() {
-    /*
-     * Initialize the SPARK MAX and get its limit switch and encoder objects for
-     * later use.
-     */
-    
-    SparkMax Hang1 = new SparkMax(18, MotorType.kBrushless);
-    SparkMax Hang2 = new SparkMax(19, MotorType.kBrushless);
-    RelativeEncoder encoder1 = Hang1.getEncoder();
-    RelativeEncoder encoder2 = Hang2.getEncoder();
-    /*
-     * Create a new SPARK MAX configuration object. This will store the
-     * configuration parameters for the SPARK MAX that we will set below.
-     */
-    SparkMaxConfig Hang1config = new SparkMaxConfig();
-    SparkMaxConfig Hang2config = new SparkMaxConfig();
-    // Set the idle mode to brake to stop immediately when reaching a limit
-    Hang1config.idleMode(IdleMode.kBrake);
-    Hang2config.idleMode(IdleMode.kBrake);
-    // Enable limit switches to stop the motor when they are closed
-    Hang1config.limitSwitch
+  public Hang() {
+    // Initialize motors
+    hang1 = new SparkMax(18, MotorType.kBrushless);
+    hang2 = new SparkMax(19, MotorType.kBrushless);
+
+    // Encoders
+    encoder1 = hang1.getEncoder();
+    encoder2 = hang2.getEncoder();
+
+    // Create config objects
+    SparkMaxConfig hang1Config = new SparkMaxConfig();
+    SparkMaxConfig hang2Config = new SparkMaxConfig();
+
+    // Idle mode
+    hang1Config.idleMode(IdleMode.kBrake);
+    hang2Config.idleMode(IdleMode.kBrake);
+
+    // Limit switches
+    hang1Config.limitSwitch
         .forwardLimitSwitchType(Type.kNormallyOpen)
         .forwardLimitSwitchEnabled(true)
         .reverseLimitSwitchType(Type.kNormallyOpen)
         .reverseLimitSwitchEnabled(true);
-    Hang2config.limitSwitch
+    hang2Config.limitSwitch
         .forwardLimitSwitchType(Type.kNormallyOpen)
         .forwardLimitSwitchEnabled(true)
         .reverseLimitSwitchType(Type.kNormallyOpen)
         .reverseLimitSwitchEnabled(true);
 
-    // Set the soft limits to stop the motor at -50 and 50 rotations
-    motorConfig.softLimit
+    // Example soft limits for hang1
+    hang1Config.softLimit
         .forwardSoftLimit(30)
         .forwardSoftLimitEnabled(true)
         .reverseSoftLimit(-30)
         .reverseSoftLimitEnabled(true);
 
-    /*
-     * Apply the configuration to the SPARK MAX.
-     *
-     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
-     * is useful in case the SPARK MAX is replaced.
-     *
-     * kPersistParameters is used to ensure the configuration is not lost when
-     * the SPARK MAX loses power. This is useful for power cycles that may occur
-     * mid-operation.
-     */
-    Hang1.configure(Hang1config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-    Hang2.configure(Hang2config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    // Apply configurations
+    hang1.configure(hang1Config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    hang2.configure(hang2Config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-    // Reset the position to 0 to start within the range of the soft limits
+    // Zero the encoders
     encoder1.setPosition(0);
     encoder2.setPosition(0);
-    // Initialize dashboard values
+
+    // Grab limit switch references (if you want to display them)
+    forwardLimitSwitch = hang1.getForwardLimitSwitch();
+    reverseLimitSwitch = hang1.getReverseLimitSwitch();
+
     SmartDashboard.setDefaultBoolean("Direction", true);
   }
 
+  /**
+   * Simple method to set the same power on both motors.
+   */
+  public void setPower(double power) {
+    hang1.set(power);
+    hang2.set(power);
+  }
+
   @Override
-  public void robotPeriodic() {
-    // Display data from SPARK onto the dashboard
+  public void periodic() {
+    // Display data
     SmartDashboard.putBoolean("Forward Limit Reached", forwardLimitSwitch.isPressed());
     SmartDashboard.putBoolean("Reverse Limit Reached", reverseLimitSwitch.isPressed());
-    SmartDashboard.putNumber("Applied Output", motor.getAppliedOutput());
-    SmartDashboard.putNumber("Position", encoder.getPosition());
+    SmartDashboard.putNumber("Hang1 Output", hang1.getAppliedOutput());
+    SmartDashboard.putNumber("Hang2 Output", hang2.getAppliedOutput());
+    SmartDashboard.putNumber("Encoder1 Position", encoder1.getPosition());
+    SmartDashboard.putNumber("Encoder2 Position", encoder2.getPosition());
   }
 
-//   public Command hangCommand(CommandXboxController controller) {
-//     return new hangCommand(this, controller);
-//   }
-
-  @Override
-  public void teleopInit() {
-
+  /**
+   * Returns a command that reads from the passed-in controller's D-pad (POV)
+   * and drives the hang motors accordingly.
+   */
+  public Command hangCommand(CommandXboxController controller) {
+    return new HangCommand(this, controller);
   }
 
-  @Override
-  public void teleopPeriodic() {
-    // Set the motor setpoint based on the direction from the dashboard
-    // if (SmartDashboard.getBoolean("Direction", true)) {
-    //   motor.set(0.2);
-    // } else {
-    //   motor.set(-0.2);
-    
-    // }
-    
+  /**
+   * Inner command class that uses the D-pad (POV) on the controller for hang control.
+   *
+   * When the D-pad is pressed up (POV = 0°), the motors run at +0.5 power.
+   * When pressed down (POV = 180°), they run at -0.5 power.
+   * Otherwise, the motors are stopped.
+   */
+  public static class HangCommand extends Command {
+    private final Hang hang;
+    private final CommandXboxController controller;
+
+    public HangCommand(Hang hang, CommandXboxController controller) {
+      this.hang = hang;
+      this.controller = controller;
+      addRequirements(hang);
+    }
+
+    @Override
+    public void execute() {
+      // Get the D-pad (POV) angle
+      int pov = controller.getHID().getPOV();
+      double power = 0.0;
+      
+      if (pov == 0) {         // D-pad up
+        power = 0.5;
+      } else if (pov == 180) { // D-pad down
+        power = -0.5;
+      } else {
+        power = 0.0;
+      }
+      
+      hang.setPower(power);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+      hang.setPower(0);
+    }
+
+    @Override
+    public boolean isFinished() {
+      return false;
+    }
   }
 }

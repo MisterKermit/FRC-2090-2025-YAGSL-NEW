@@ -39,13 +39,6 @@ public final class Constants
   public static final double MAX_SPEED  = Units.feetToMeters(14.5);
   // Maximum speed of the robot in meters per second, used to limit acceleration.
 
-//  public static final class AutonConstants
-//  {
-//
-//    public static final PIDConstants TRANSLATION_PID = new PIDConstants(0.7, 0, 0);
-//    public static final PIDConstants ANGLE_PID       = new PIDConstants(0.4, 0, 0.01);
-//  }
-
   public static final class DrivebaseConstants
   {
 
@@ -62,50 +55,23 @@ public final class Constants
     public static final double RIGHT_X_DEADBAND = 0.1;
     public static final double TURN_CONSTANT    = 6;
   }
-  // public static class ArmConstants
-  // {
+  public static class ArmConstants
+  {
+    public static int arm_left_id = 17;
+    public static int arm_right_id = 18;
 
-  //   // The P gain for the PID controller that drives this arm.
-  //   public static final double kArmKp                     = 2.0691;
-  //   public static final double kArmKi                     = 0;
-  //   public static final double kArmKd                     = 0.0;
-  //   public static final Angle  kArmAllowedClosedLoopError = Arm.convertAngleToSensorUnits(Degrees.of(0.01));
-
-  //   public static final double  kArmReduction                   = 200;
-  //   public static final double  kArmMass                        = 8.0; // Kilograms
-  //   public static final double  kArmLength                      = Inches.of(72).in(Meters);
-  //   public static final Angle   kArmStartingAngle               = Degrees.of(0);
-  //   public static final Angle   kMinAngle                       = Degrees.of(-75);
-  //   public static final Angle   kMaxAngle                       = Degrees.of(255);
-  //   public static final double  kArmRampRate                    = 0.5;
-  //   public static final Angle   kArmOffsetToHorizantalZero      = Rotations.of(0);
-  //   public static final boolean kArmInverted                    = false;
-  //   public static final double  kArmMaxVelocityRPM              = Arm.convertAngleToSensorUnits(Degrees.of(90)).per(
-  //       Second).in(RPM);
-  //   public static final double  kArmMaxAccelerationRPMperSecond = Arm.convertAngleToSensorUnits(Degrees.of(180)).per(
-  //                                                                        Second).per(Second)
-  //                                                                    .in(RPM.per(Second));
-  //   public static final int     kArmStallCurrentLimitAmps       = 40;
-
-  //   public static final double kArmkS = 0; // volts (V)
-  //   public static final double kArmkG = 0; // volts (V)
-  //   public static final double kArmKv = 0; // volts per velocity (V/RPM)
-  //   public static final double kArmKa = 0; // volts per acceleration (V/(RPM/s))
-
-
-  // }
+    public static double lower_angle_bound = 0;
+    public static double upper_angle_bound = 90;
+    
+  }
 
   public static class ElevatorConstants
   {
-    public static final double kP = 0.25;
-    
-    public static double[] elevatorLevels = {
-      0,
-      100,
-      1000
-    };
-    public static final double elevatorBottomLimit = 0;
-    public static final double elevatorTopLimit = Constants.ElevatorConstants.elevatorLevels[Constants.ElevatorConstants.elevatorLevels.length-1];
+    public static final double MAX_VOLTAGE = 3.0;
+    public static final double JOYSTICK_DEADBAND = 0.12;
+    public static final double MAX_HEIGHT_INCHES = 46;
+    public static final double MIN_HEIGHT_INCHES = 3;
+    public static double ELEVATION_GEAR_RATIO = 6.12 / (1.273 * Math.PI * 2);
   }
     
 

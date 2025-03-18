@@ -20,7 +20,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.Hang;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevationTarget;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -43,7 +45,11 @@ public class RobotContainer
 
   private final ElevatorSubsystem     elevator   = new ElevatorSubsystem();
 
+  // private final ArmSubsystem          arm        = new ArmSubsystem();
+
   private final VisionSubsystem       vision     = new VisionSubsystem("limelight");
+
+  private final Hang                  hang       = new Hang();
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
@@ -129,13 +135,17 @@ public class RobotContainer
         driveDirectAngleKeyboard);
     Command ManualControlElevator = elevator.manualElevationCommand(driverXbox);
 
+    Command HangSequence = hang.hangCommand(driverXbox);
+    // Command ArmReset = arm.moveArmToPosition(0);
+    // Command ArmIntake = arm.setArmToIntake();
     if (RobotBase.isSimulation())
     {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
     } else
     {
-      // drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-      elevator.setDefaultCommand(ManualControlElevator);
+      drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+      // elevator.setDefaultCommand(ManualControlElevator);
+      // arm.setDefaultCommand(ArmReset);
     }
 
     if (Robot.isSimulation())
@@ -180,13 +190,18 @@ public class RobotContainer
     } else
     {
       driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
+      // driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.rightBumper().onTrue(Commands.none());
       //test bind
-      driverXbox.b().whileTrue(elevator.elevateCommand(ElevationTarget.L1));
+      driverXbox.b().onTrue(elevator.elevateCommand(ElevationTarget.L1));
+      driverXbox.x().onTrue(elevator.elevateCommand(ElevationTarget.L2));
+      // driverXbox.povUp().whileTrue(HangSequence);
+      driverXbox.y().onTrue(elevator.elevateCommand(ElevationTarget.CoralIntake));
+      
+      // driverXbox.leftBumper().whileTrue(ArmIntake);
     }
 
 

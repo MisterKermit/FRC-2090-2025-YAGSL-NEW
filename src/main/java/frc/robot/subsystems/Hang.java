@@ -53,9 +53,9 @@ public class Hang extends SubsystemBase {
 
     // Example soft limits for hang1
     hang1Config.softLimit
-        .forwardSoftLimit(30)
+        .forwardSoftLimit(60)
         .forwardSoftLimitEnabled(true)
-        .reverseSoftLimit(-30)
+        .reverseSoftLimit(-60)
         .reverseSoftLimitEnabled(true);
 
     // Apply configurations

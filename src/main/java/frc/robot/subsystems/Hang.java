@@ -53,9 +53,9 @@ public class Hang extends SubsystemBase {
 
     // Example soft limits for hang1
     hang1Config.softLimit
-        .forwardSoftLimit(30)
+        .forwardSoftLimit(60)
         .forwardSoftLimitEnabled(true)
-        .reverseSoftLimit(-30)
+        .reverseSoftLimit(-60)
         .reverseSoftLimitEnabled(true);
 
     // Apply configurations
@@ -73,12 +73,10 @@ public class Hang extends SubsystemBase {
     SmartDashboard.setDefaultBoolean("Direction", true);
   }
 
-  /**
-   * Simple method to set the same power on both motors.
-   */
+// set power method
   public void setPower(double power) {
     hang1.set(power);
-    hang2.set(power);
+    hang2.set(-power);
   }
 
   @Override
@@ -92,17 +90,11 @@ public class Hang extends SubsystemBase {
     SmartDashboard.putNumber("Encoder2 Position", encoder2.getPosition());
   }
 
-  /**
-   * Returns a command that reads from the passed-in controller's D-pad (POV)
-   * and drives the hang motors accordingly.
-   */
   public Command hangCommand(CommandXboxController controller) {
     return new HangCommand(this, controller);
   }
 
-  /**
-   * Inner command class that uses the D-pad (POV) on the controller for hang control.
-   *
+  /** 
    * When the D-pad is pressed up (POV = 0°), the motors run at +0.5 power.
    * When pressed down (POV = 180°), they run at -0.5 power.
    * Otherwise, the motors are stopped.

@@ -22,9 +22,9 @@ public class RobotMath
      * @return {@link Angle} equivalent to rotations of the motor.
      */
     //TODO: Change to gear ratio of arm
-    public static Angle convertAngleToSensorUnits(Angle measurement)
+    public static Angle convertAngleToSensorUnits(Angle measurement, double reductionRatio)
     {
-      return Rotations.of(measurement.in(Rotations) * 4);
+      return Rotations.of(measurement.in(Rotations) * reductionRatio);
     }
 
     /**
@@ -33,9 +33,9 @@ public class RobotMath
      * @param measurement Motor roations
      * @return Usable angle.
      */
-    public static Angle convertSensorUnitsToAngle(Angle measurement)
+    public static Angle convertSensorUnitsToAngle(Angle measurement, double reductionRatio)
     {
-      return Rotations.of(measurement.in(Rotations) / 4);
+      return Rotations.of(measurement.in(Rotations) / reductionRatio);
 
     }
   }

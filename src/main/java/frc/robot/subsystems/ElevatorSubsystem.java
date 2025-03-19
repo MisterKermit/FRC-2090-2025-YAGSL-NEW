@@ -57,9 +57,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     Elevator_Config.Feedback.SensorToMechanismRatio = Constants.ElevatorConstants.ELEVATION_GEAR_RATIO;
 
     //TODO: Elevator Overshoot issue, tune kD and kV, kP
-    Elevator_Config.Slot0.kG = 0.6; //0.3 
+    Elevator_Config.Slot0.kG = 0.8; //0.3 
     Elevator_Config.Slot0.kS = 0.05; //0.4
-    Elevator_Config.Slot0.kV = 0.02; //0.001
+    Elevator_Config.Slot0.kV = 0.002; //0.001
     Elevator_Config.Slot0.kA = 0.001; //0.0
     Elevator_Config.Slot0.kP = 0.5; //0.5
     Elevator_Config.Slot0.kI = 0.0;
@@ -109,7 +109,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     return new ElevateCommand(this, target);
   }
 
-  public Command elevateCommand(ElevationTarget target) {
+  public Command elevateCommandState(ElevationTarget target) {
     return elevateCommand(target.getValue());
   }
   
@@ -129,8 +129,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void execute() {
       SmartDashboard.putNumber("Elevator Target", elevateTarget);
       setPosition(elevateTarget);
-
     }
+
     @Override
     public void end(boolean isInterrupted) {
       setPosition(getElevatorPosition());
@@ -162,10 +162,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
-  public void elevateAtVoltage(double voltage) {
-    rightMotorLeader.setVoltage(voltage);
-  }
-  
 
   private class ManualElevationCommand extends Command {
     private final CommandXboxController controller;
@@ -184,11 +180,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override // every 20ms
     public void execute() {
       double input = -controller.getLeftY();
-      // if (Math.abs(input) > Constants.ElevatorConstants.JOYSTICK_DEADBAND) {
-      //   targetPosition = targetPosition + input;
-      // }
-      // targetPosition = Math.max(Math.min(targetPosition, Constants.ElevatorConstants.MAX_HEIGHT_INCHES), Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
-      // setPosition(targetPosition);
 
       // Only update the target position if input is outside the deadband
       if (Math.abs(input) > Constants.ElevatorConstants.JOYSTICK_DEADBAND) {

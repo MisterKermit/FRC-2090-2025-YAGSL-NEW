@@ -57,12 +57,34 @@ public final class Constants
   }
   public static class ArmConstants
   {
-    public static int arm_left_id = 17;
-    public static int arm_right_id = 18;
+    public static int arm_id = 16;
 
-    public static double lower_angle_bound = 0;
-    public static double upper_angle_bound = 90;
+    public static double rotations_to_degrees = (1.0/120) * 360;
+
+    public enum ArmStates{
+      Stow,
+      Intake
+    }
+
+    public static double stow_angle = 45;
+    public static double intake_angle = 0;
     
+  }
+  
+  public static class WristConstants
+  {
+    public static int wrist_id = 15;
+
+    public static double rotations_to_degrees = (1.0/100) * 360;
+
+    public enum WristStates {
+      Stow,
+      Intake
+    }
+
+    public static double stow_angle = 45;
+    public static double intake_angle = 0;
+
   }
 
   public static class ElevatorConstants
@@ -72,6 +94,19 @@ public final class Constants
     public static final double MAX_HEIGHT_INCHES = 46;
     public static final double MIN_HEIGHT_INCHES = 3;
     public static double ELEVATION_GEAR_RATIO = 6.12 / (1.273 * Math.PI * 2);
+  }
+
+  public static class ScoringConstants
+  {
+    public enum ScoringStates {
+      Stow,
+      Intake
+      // L1,
+      // L2,
+      // L3,
+      // AlgaeL2,
+      // AlgaeL3
+    }
   }
     
 

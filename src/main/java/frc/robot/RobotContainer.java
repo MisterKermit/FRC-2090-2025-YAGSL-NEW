@@ -217,6 +217,10 @@ public class RobotContainer
     // An example command will be run in autonomous
     return drivebase.getAutonomousCommand("New Auto");
   }
+// // command for autonomous
+//   public Command getAutonomousCommand() {
+//     return new FollowPathAutoCommand(swerveSubsystem);
+//   }
 
   public void setMotorBrake(boolean brake)
   {

@@ -77,7 +77,7 @@ public final class Constants {
   public static class WristConstants {
     public static int wrist_id = 15;
 
-    public static double rotations_to_degrees = (1.0 / 100) * 360;
+    public static double rotations_to_degrees = (1.0 / 100.0) * 360.0;
 
     public enum WristStates {
       Stow,

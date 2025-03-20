@@ -79,7 +79,15 @@ public class RobotContainer {
       .scaleTranslation(1)
       .allianceRelativeControl(true);
 
-  /**
+  SwerveInputStream driveSlowAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
+      () -> driverXbox.getLeftY() * -0.1,
+      () -> driverXbox.getLeftX() * -0.1)
+      .withControllerRotationAxis(driverXbox::getRightX)
+      .deadband(OperatorConstants.DEADBAND)
+      .scaleTranslation(1)
+      .allianceRelativeControl(true);
+  /*
+
    * Clone's the angular velocity input stream and converts it to a fieldRelative
    * input stream.
    */
@@ -164,7 +172,7 @@ public class RobotContainer {
     // Command ArmIntake = arm.rotateArm(0.5);
     // Command RotateArmTest = arm.rotateArm(40);
 
-    // Command ArmUp = arm.runArmUp();
+    Command ArmUp = scoring.wristForward();
     // Command ArmDown = arm.runArmDown();
 
     Trigger YAxisJoystickTrigger = new Trigger(() -> {
@@ -243,7 +251,7 @@ public class RobotContainer {
       driverXbox.x().onTrue(new ScoringMacro(scoring, ScoringStates.Stow));
       // driverXbox.y().onTrue(new ScoringMacro(arm, elevator, wrist, ScoringStates.Intake));
       // driverXbox.x().onTrue(SetArmPivot);
-      // driverXbox.y().onTrue(ArmUp);
+      // driverXbox.y().onTrue(ArmUp);  
       // driverXbox.y().onTrue(ArmDown);
       // driverXbox.leftBumper().whileTrue(ArmIntake);
     }

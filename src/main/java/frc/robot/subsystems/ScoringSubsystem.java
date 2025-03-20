@@ -36,23 +36,23 @@ import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ScoringConstants.ScoringStates;
 
 public class ScoringSubsystem extends SubsystemBase {
-    private SparkFlexConfig armPivotConfig = new SparkFlexConfig();
-    private SparkFlexConfig wristConfig = new SparkFlexConfig();
+    private SparkMaxConfig armPivotConfig = new SparkMaxConfig();
+    private SparkMaxConfig wristConfig = new SparkMaxConfig();
 
     // initialize arm pivot
-    private SparkFlex armPivot = new SparkFlex(ArmConstants.arm_id, MotorType.kBrushless);
+    private SparkMax armPivot = new SparkMax(ArmConstants.arm_id, MotorType.kBrushless);
     private SparkClosedLoopController armPivotController = armPivot.getClosedLoopController();
     private RelativeEncoder armPivotEncoder = armPivot.getEncoder();
-    public static double kArmP = 0.1;
+    public static double kArmP = 0.5;
     public static double kArmI = 0;
     public static double kArmD = 0;
     public static double armAngleSetPoint = 0;
 
     // initialize intake pivot
-    private SparkFlex wrist = new SparkFlex(WristConstants.wrist_id, MotorType.kBrushless);
+    private SparkMax wrist = new SparkMax(WristConstants.wrist_id, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wrist.getClosedLoopController();
     private RelativeEncoder wristEncoder = wrist.getEncoder();
-    public static double kWristP = 10;
+    public static double kWristP = 0.2;
     public static double kWristI = 0;
     public static double kWristD = 0;
     public static double wristAngleSetPoint = 0;
@@ -61,13 +61,14 @@ public class ScoringSubsystem extends SubsystemBase {
         // create configs
         armPivotConfig
                 .inverted(true)
-                .idleMode(IdleMode.kBrake)
+                .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(80)
                 .voltageCompensation(12);
         armPivotConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(kArmP, kArmI, kArmD)
-                .outputRange(-1, 1).maxMotion
+                .outputRange(-1, 1)
+                .maxMotion
                 .maxVelocity(10)
                 .maxAcceleration(5)
                 .allowedClosedLoopError(1)
@@ -76,11 +77,11 @@ public class ScoringSubsystem extends SubsystemBase {
                 // degrees
                 .positionConversionFactor(Constants.ArmConstants.rotations_to_degrees)
                 // degrees per sec
-                .velocityConversionFactor(Constants.ArmConstants.velocity_conversion);
+                .velocityConversionFactor(1);
 
         wristConfig
-                .inverted(false)
-                .idleMode(IdleMode.kBrake)
+                .inverted(true)
+                .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(80)
                 .voltageCompensation(12);
         wristConfig.closedLoop
@@ -97,12 +98,14 @@ public class ScoringSubsystem extends SubsystemBase {
                 // degrees per sec
                 .velocityConversionFactor(360 / 60);
 
+
+        armPivotEncoder.setPosition(0);
+        wristEncoder.setPosition(0);
         // set configs for motors
         armPivot.configure(armPivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         wrist.configure(wristConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        SmartDashboard.putNumber("ArmAngleSetpoint", armAngleSetPoint);
-        SmartDashboard.putNumber("WristAngleSetpoint", wristAngleSetPoint);
+        
     }
 
     public Trigger atArmAngle(double angle, double tolerance) {
@@ -241,7 +244,7 @@ public class ScoringSubsystem extends SubsystemBase {
     }
 
     public Command wristForward() {
-        return run(() -> wrist.set(0.5));
+        return run(() -> wrist.set(0.1));
     }
 
     public Command wristBackwards() {
@@ -256,6 +259,8 @@ public class ScoringSubsystem extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Arm Position", armPivotEncoder.getPosition());
         SmartDashboard.putNumber("Wrist Position", wristEncoder.getPosition());
+        SmartDashboard.putNumber("ArmAngleSetpoint", armAngleSetPoint);
+        SmartDashboard.putNumber("WristAngleSetpoint", wristAngleSetPoint);
 
         // if (Constants.Testing.testingArm) {
         // reachArmPivotTarget(SmartDashboard.getNumber("ArmAngleSetpoint", 0));

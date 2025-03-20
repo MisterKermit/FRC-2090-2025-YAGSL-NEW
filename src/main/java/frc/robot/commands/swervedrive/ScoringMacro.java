@@ -34,7 +34,7 @@ public class ScoringMacro extends Command {
         switch (state) {
             case Stow:
                 scoring.setArmPivotState(state);
-                scoring.setWristState(state);
+                // scoring.setWristState(state);
                 // .setElevatorState(state);
                 break;
         

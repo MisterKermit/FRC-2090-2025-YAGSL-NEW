@@ -49,8 +49,8 @@ public class WristSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Wrist Position", getWristPos());
-        SmartDashboard.putNumber("Wrist Target Angle", wrist_target);
+        // SmartDashboard.putNumber("Wrist Position", getWristPos());
+        // SmartDashboard.putNumber("Wrist Target Angle", wrist_target);
     }
 
     public double getWristPos() {

@@ -54,7 +54,7 @@ public class ArmSubsystem extends SubsystemBase {
   public ArmSubsystem() {
     config
         .idleMode(IdleMode.kCoast)
-        .inverted(true)
+        .inverted(false)
         .smartCurrentLimit(40)
         .voltageCompensation(12);
     config.closedLoop
@@ -76,9 +76,9 @@ public class ArmSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Relative Enc pos", getAlgaeArmPosition());
-    SmartDashboard.putNumber("Arm Target Pos", armsetPoint);
-    SmartDashboard.putNumber("Arm Velocity", arm_encoder.getVelocity());
+    // SmartDashboard.putNumber("Relative Enc pos", getAlgaeArmPosition());
+    // SmartDashboard.putNumber("Arm Target Pos", armsetPoint);
+    // SmartDashboard.putNumber("Arm Velocity", arm_encoder.getVelocity());
   }
 
   public double getAlgaeArmPosition() {

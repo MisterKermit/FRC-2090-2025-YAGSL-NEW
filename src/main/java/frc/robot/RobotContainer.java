@@ -16,24 +16,29 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.OperatorConstants.RobotStates;
 import frc.robot.Constants.ArmConstants.ArmStates;
 import frc.robot.Constants.ScoringConstants.ScoringStates;
-import frc.robot.commands.swervedrive.ScoringMacro;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.commands.ElevatorCommand;
+import frc.robot.commands.ManualElevationCommand;
+import frc.robot.commands.ScoringMacro;
+import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.Hang;
 import frc.robot.subsystems.ScoringSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.ElevatorSubsystem.ElevationTarget;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+import java.lang.management.OperatingSystemMXBean;
 
 import org.ironmaple.simulation.IntakeSimulation.IntakeSide;
 
@@ -51,6 +56,8 @@ public class RobotContainer {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   public final static CommandXboxController driverXbox = new CommandXboxController(0);
+
+  public final static CommandXboxController operatorXbox = new CommandXboxController(1);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve/falcon"));
@@ -59,13 +66,17 @@ public class RobotContainer {
 
   private final ScoringSubsystem scoring = new ScoringSubsystem();
 
-  // private final ArmSubsystem arm = new ArmSubsystem();
+  private final AlgaeIntake aIntake = new AlgaeIntake();
 
-  // private final WristSubsystem wrist = new WristSubsystem();
+  private final CoralIntake cIntake = new CoralIntake();
 
   private final VisionSubsystem vision = new VisionSubsystem("limelight");
 
   private final Hang hang = new Hang();
+
+  private static RobotStates currentRoboState = RobotStates.NORMAL;
+
+  private static boolean slowMode = false;
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
@@ -131,6 +142,13 @@ public class RobotContainer {
       .translationHeadingOffset(Rotation2d.fromDegrees(
           0));
 
+  public Command IntakeSETPOS() {
+    return scoring.setArmPivotStateCommand(ScoringStates.Stow).andThen(new ElevatorCommand(elevator, ElevationTarget.CoralIntake.getValue()));
+  }
+
+  public Command slowModeToggle(boolean isSlow) {
+    return new InstantCommand(() -> slowMode = isSlow ? !isSlow : isSlow);
+  }
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -155,24 +173,26 @@ public class RobotContainer {
    * Flight joysticks}.
    */
   private void configureBindings() {
-    Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
+    // Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command driveRobotOrientedAngularVelocity = drivebase.driveFieldOriented(driveRobotOriented);
-    Command driveSetpointGen = drivebase.driveWithSetpointGeneratorFieldRelative(
-        driveDirectAngle);
-    Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
-    Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
-    Command driveSetpointGenKeyboard = drivebase.driveWithSetpointGeneratorFieldRelative(
-        driveDirectAngleKeyboard);
-    Command ManualControlElevator = elevator.manualElevationCommand(driverXbox);
+    Command driveSlowFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveSlowAngularVelocity);
+    // Command driveRobotOrientedAngularVelocity = drivebase.driveFieldOriented(driveRobotOriented);
+    // Command driveSetpointGen = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
+    // Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
+    // Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
+    // Command driveSetpointGenKeyboard = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleKeyboard);
+    Command ManualControlElevator = new ManualElevationCommand(elevator, driverXbox);
     // Command ManualArm = arm.manualArm(driverXbox);
     Command HangSequence = hang.hangCommand(driverXbox);
+
+    
+    
     // Command SetArmPivot = arm.setStateArm(ArmStates.Stow);
     // Command ArmReset = arm.moveArmToPosition(0);
     // Command ArmIntake = arm.rotateArm(0.5);
     // Command RotateArmTest = arm.rotateArm(40);
 
-    Command ArmUp = scoring.wristForward();
+    // Command ArmUp = scoring.wristForward();
     // Command ArmDown = arm.runArmDown();
 
     Trigger YAxisJoystickTrigger = new Trigger(() -> {
@@ -186,75 +206,61 @@ public class RobotContainer {
       }
     });
 
-    YAxisJoystickTrigger
-      .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.01), 
-                                                 () -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.01)))
-      .onFalse(scoring.stopWholeArm());
     
-    if (RobotBase.isSimulation()) {
-      drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
-    } else {
-      // drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-      // elevator.setDefaultCommand(ManualControlElevator);
-      // arm.setDefaultCommand(ManualArm);
+    switch (currentRoboState) {
+      case NORMAL:
+        operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+        operatorXbox.b().whileTrue(cIntake.runCoralIntake());
+        operatorXbox.x().whileTrue(cIntake.reverseCoralIntake());
+        operatorXbox.leftBumper().whileTrue(aIntake.runIntakeAlgae());
+        operatorXbox.rightBumper().whileTrue(aIntake.reverseIntakeAlgae());
+        driverXbox.x().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Stow));
+        driverXbox.leftBumper().onTrue(slowModeToggle(slowMode));
+        driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.MANUAL));
+        if (slowMode || scoring.returnState() != ScoringStates.Stow) {
+          drivebase.setDefaultCommand(driveSlowFieldOrientedAngularVelocity);
+        } else {
+          drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        }
+        break;
+
+      case MANUAL:
+        operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+        driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL));
+        YAxisJoystickTrigger
+        .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-operatorXbox.getLeftY(), 0.01), 
+                                                  () -> MathUtil.applyDeadband(-operatorXbox.getRightY(), 0.01)))
+        .onFalse(scoring.stopWholeArm());
+        driverXbox.leftBumper().onTrue(slowModeToggle(slowMode));
+        if (slowMode || scoring.returnState() != ScoringStates.Stow) {
+          drivebase.setDefaultCommand(driveSlowFieldOrientedAngularVelocity);
+        } else {
+          drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        }
+        break;
     }
+      
 
-    if (Robot.isSimulation()) {
-      Pose2d target = new Pose2d(new Translation2d(1, 4),
-          Rotation2d.fromDegrees(90));
-      // drivebase.getSwerveDrive().field.getObject("targetPose").setPose(target);
-      driveDirectAngleKeyboard.driveToPose(() -> target,
-          new ProfiledPIDController(5,
-              0,
-              0,
-              new Constraints(5, 2)),
-          new ProfiledPIDController(5,
-              0,
-              0,
-              new Constraints(Units.degreesToRadians(360),
-                  Units.degreesToRadians(180))));
-      driverXbox.start().onTrue(Commands.runOnce(() -> drivebase.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
-      driverXbox.button(1).whileTrue(drivebase.sysIdDriveMotorCommand());
-      driverXbox.button(2).whileTrue(Commands.runEnd(() -> driveDirectAngleKeyboard.driveToPoseEnabled(true),
-          () -> driveDirectAngleKeyboard.driveToPoseEnabled(false)));
+    
 
-      // driverXbox.b().whileTrue(
-      // drivebase.driveToPose(
-      // new Pose2d(new Translation2d(4, 4), Rotation2d.fromDegrees(0)))
-      // );
-
-    }
-    if (DriverStation.isTest()) {
-      drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity); // Overrides drive command above!
-
-      driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.y().whileTrue(drivebase.driveToDistanceCommand(1.0, 0.2));
-      driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      driverXbox.back().whileTrue(drivebase.centerModulesCommand());
-      driverXbox.leftBumper().onTrue(Commands.none());
-      driverXbox.rightBumper().onTrue(Commands.none());
-
-    } else {
-      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      // driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
-      driverXbox.start().whileTrue(Commands.none());
-      driverXbox.back().whileTrue(Commands.none());
-      // driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock,
-      // drivebase).repeatedly());
-      driverXbox.rightBumper().onTrue(Commands.none());
-      // test bind
-      // driverXbox.b().onTrue(elevator.elevateCommand(ElevationTarget.L1));
-      // driverXbox.x().onTrue(elevator.elevateCommand(ElevationTarget.L2));
-      // driverXbox.povUp().whileTrue(HangSequence);
-      // driverXbox.y().onTrue(elevator.elevateCommand(ElevationTarget.CoralIntake));
-      // driverXbox.y().onTrue(RotateArmTest);
-      driverXbox.x().onTrue(new ScoringMacro(scoring, ScoringStates.Stow));
-      // driverXbox.y().onTrue(new ScoringMacro(arm, elevator, wrist, ScoringStates.Intake));
-      // driverXbox.x().onTrue(SetArmPivot);
-      // driverXbox.y().onTrue(ArmUp);  
-      // driverXbox.y().onTrue(ArmDown);
-      // driverXbox.leftBumper().whileTrue(ArmIntake);
-    }
+    
+    // driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
+    
+    // driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock,
+    // drivebase).repeatedly());
+    
+    // test bind
+    // driverXbox.b().onTrue(elevator.elevateCommand(ElevationTarget.L1));
+    // driverXbox.x().onTrue(elevator.elevateCommand(ElevationTarget.L2));
+    // driverXbox.povUp().whileTrue(HangSequence);
+    // driverXbox.y().onTrue(elevator.elevateCommand(ElevationTarget.CoralIntake));
+    // driverXbox.y().onTrue(RotateArmTest);
+    // driverXbox.y().onTrue(new ScoringMacro(arm, elevator, wrist, ScoringStates.Intake));
+    // driverXbox.x().onTrue(SetArmPivot);
+    // driverXbox.y().onTrue(ArmUp);  
+    // driverXbox.y().onTrue(ArmDown);
+    // driverXbox.leftBumper().whileTrue(ArmIntake);
+    
 
   }
 

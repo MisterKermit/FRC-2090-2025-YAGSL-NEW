@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.Constants.ScoringConstants.ScoringStates;
 import edu.wpi.first.units.Units;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -75,7 +76,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     Elevator_Config.CurrentLimits.SupplyCurrentLowerLimit = 30;
     Elevator_Config.CurrentLimits.SupplyCurrentLimit = 60;
     Elevator_Config.CurrentLimits.SupplyCurrentLowerTime = 1;
-
+    
   }
 
   public ElevatorSubsystem() {
@@ -106,48 +107,29 @@ public class ElevatorSubsystem extends SubsystemBase {
     topMotorFollower.setPosition(height);
   }
 
-  public Command elevateCommand(double target) {
-    return new ElevateCommand(this, target);
-  }
-
-  public Command elevateCommandState(ElevationTarget target) {
-    return elevateCommand(target.getValue());
-  }
-
-  private class ElevateCommand extends Command {
-    private double elevateTarget;
-
-    private static final double ELEVATE_COMMAND_DEADBAND = 0.25; // inches
-
-    public ElevateCommand(ElevatorSubsystem elevator, double elevateTarget) {
-      elevateTarget = Math.max(Math.min(elevateTarget, Constants.ElevatorConstants.MAX_HEIGHT_INCHES),
-          Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
-      this.elevateTarget = elevateTarget;
-      addRequirements(elevator);
-      // It's fine to ignore the joystick because the profile should not take very
-      // long
-    }
-
-    @Override // every 20ms
-    public void execute() {
-      SmartDashboard.putNumber("Elevator Target", elevateTarget);
-      setPosition(elevateTarget);
-    }
-
-    @Override
-    public void end(boolean isInterrupted) {
-      setPosition(getElevatorPosition());
-    }
-
-    @Override
-    public boolean isFinished() {
-      return Math.abs(getElevatorPosition() - elevateTarget) < ELEVATE_COMMAND_DEADBAND;
+  public void setElevatorState(ScoringStates state) {
+    switch (state) {
+      case Stow:
+        setPosition(ElevationTarget.CoralIntake.getValue());
+        break;
+    
+      case Intake:
+        setPosition(ElevationTarget.L1.getValue());
+        break;
     }
   }
+  // public Command elevateCommand(double target) {
+  //   return new ElevateCommand(this, target);
+  // }
+
+  // public Command elevateCommandState(ElevationTarget target) {
+  //   return elevateCommand(target.getValue());
+  // }
 
   public enum ElevationTarget {
     // https://www.desmos.com/calculator/ocl2iqiu7n
     // Unit: inches
+    //tune tommorow
     CoralIntake(3),
     L1(13.899),
     L2(24.899),
@@ -166,45 +148,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
-  private class ManualElevationCommand extends Command {
-    private final CommandXboxController controller;
-
-    public ManualElevationCommand(ElevatorSubsystem elevator, CommandXboxController controller) {
-      this.controller = controller;
-      addRequirements(elevator);
-    }
-
-    @Override
-    public void initialize() {
-    }
-
-    @Override // every 20ms
-    public void execute() {
-      double input = -controller.getLeftY();
-
-      // Only update the target position if input is outside the deadband
-      if (Math.abs(input) > Constants.ElevatorConstants.JOYSTICK_DEADBAND) {
-        targetPosition += input * 0.5; // Scale input to avoid excessive movement
-      }
-
-      // Clamp the target position to within the valid elevator range
-      targetPosition = Math.max(Math.min(targetPosition, Constants.ElevatorConstants.MAX_HEIGHT_INCHES),
-          Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
-
-      // Continuously set the elevator to the last stored target position
-      setPosition(targetPosition);
-    }
-  }
-
-  public Command manualElevationCommand(CommandXboxController controller) {
-    return new ManualElevationCommand(this, controller);
-  }
-
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Elevator Target", targetPosition);
     SmartDashboard.putNumber("Elevator Height", getElevatorPosition());
     SmartDashboard.putNumber("Motion Magic is Running", rightMotorLeader.getMotionMagicIsRunning().getValue().value);
   }
-
 }

@@ -55,6 +55,12 @@ public final class Constants {
     public static final double LEFT_Y_DEADBAND = 0.1;
     public static final double RIGHT_X_DEADBAND = 0.1;
     public static final double TURN_CONSTANT = 6;
+
+    public enum RobotStates {
+      NORMAL,
+      MANUAL,
+    }
+    
   }
 
   public static class ArmConstants {
@@ -94,6 +100,8 @@ public final class Constants {
     public static final double JOYSTICK_DEADBAND = 0.12;
     public static final double MAX_HEIGHT_INCHES = 46;
     public static final double MIN_HEIGHT_INCHES = 3;
+
+    //check if inches are consistent
     public static double ELEVATION_GEAR_RATIO = 6.12 / (1.273 * Math.PI * 2);
   }
 

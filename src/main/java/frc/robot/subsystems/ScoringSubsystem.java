@@ -52,16 +52,18 @@ public class ScoringSubsystem extends SubsystemBase {
     private SparkMax wrist = new SparkMax(WristConstants.wrist_id, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wrist.getClosedLoopController();
     private RelativeEncoder wristEncoder = wrist.getEncoder();
-    public static double kWristP = 0.2;
+    public static double kWristP = 0.1;
     public static double kWristI = 0;
-    public static double kWristD = 0;
+    public static double kWristD = 0.01;
     public static double wristAngleSetPoint = 0;
+
+    public static ScoringStates currentState;
 
     public ScoringSubsystem() {
         // create configs
         armPivotConfig
                 .inverted(true)
-                .idleMode(IdleMode.kCoast)
+                .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(80)
                 .voltageCompensation(12);
         armPivotConfig.closedLoop
@@ -69,8 +71,8 @@ public class ScoringSubsystem extends SubsystemBase {
                 .pid(kArmP, kArmI, kArmD)
                 .outputRange(-1, 1)
                 .maxMotion
-                .maxVelocity(10)
-                .maxAcceleration(5)
+                .maxVelocity(300000)
+                .maxAcceleration(60000)
                 .allowedClosedLoopError(1)
                 .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
         armPivotConfig.encoder
@@ -81,15 +83,15 @@ public class ScoringSubsystem extends SubsystemBase {
 
         wristConfig
                 .inverted(true)
-                .idleMode(IdleMode.kCoast)
+                .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(80)
                 .voltageCompensation(12);
         wristConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(kWristP, kWristI, kWristD)
                 .outputRange(-1, 1).maxMotion
-                .maxVelocity(10)
-                .maxAcceleration(5)
+                .maxVelocity(11000)
+                .maxAcceleration(4000)
                 .allowedClosedLoopError(1)
                 .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
         wristConfig.encoder
@@ -186,8 +188,8 @@ public class ScoringSubsystem extends SubsystemBase {
             case Intake:
                 reachArmPivotTarget(Constants.ArmConstants.intake_angle);
                 break;
-
         }
+        currentState = state;
     }
 
     public Command setArmPivotStateCommand(ScoringStates state) {
@@ -213,8 +215,12 @@ public class ScoringSubsystem extends SubsystemBase {
             case Intake:
                 reachWristTarget(WristConstants.intake_angle);
                 break;
-
         }
+        currentState = state;
+    }
+
+    public ScoringStates returnState() {
+        return currentState;
     }
 
     public void reachWristTarget(double target) {

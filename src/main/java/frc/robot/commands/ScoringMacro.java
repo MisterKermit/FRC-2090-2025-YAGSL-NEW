@@ -1,13 +1,13 @@
-package frc.robot.commands.swervedrive;
+package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ArmConstants.ArmStates;
 import frc.robot.Constants.ScoringConstants.ScoringStates;
 import frc.robot.Constants.WristConstants.WristStates;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ScoringSubsystem;
-import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.ElevatorSubsystem.ElevationTarget;
 
 public class ScoringMacro extends Command {
@@ -17,12 +17,15 @@ public class ScoringMacro extends Command {
 
     private final ScoringSubsystem scoring;
 
+    private final ElevatorSubsystem elevator;
+
     private ScoringStates state;
     
-    public ScoringMacro(ScoringSubsystem scoring, ScoringStates state) {
+    public ScoringMacro(ScoringSubsystem scoring, ElevatorSubsystem elevator, ScoringStates state) {
         this.scoring = scoring;
         this.state = state;
-        addRequirements(scoring);
+        this.elevator = elevator;
+        addRequirements(scoring, elevator);
     }
 
     public void initialize() {
@@ -34,13 +37,13 @@ public class ScoringMacro extends Command {
         switch (state) {
             case Stow:
                 scoring.setArmPivotState(state);
-                // scoring.setWristState(state);
-                // .setElevatorState(state);
+                scoring.setWristState(state);
+                elevator.setElevatorState(state);
                 break;
         
             case Intake:
                 scoring.setArmPivotState(state);
-                // elevator.elevateCommandState(ElevationTarget.L1);
+                elevator.setElevatorState(state);
                 scoring.setArmPivotState(state);
                 break;
         }

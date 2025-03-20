@@ -16,8 +16,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class WristSubsystem extends SubsystemBase{
-    
+public class WristSubsystem extends SubsystemBase {
+
     private SparkMax wrist = new SparkMax(Constants.WristConstants.wrist_id, MotorType.kBrushless);
 
     private SparkMaxConfig wrist_config = new SparkMaxConfig();
@@ -27,25 +27,22 @@ public class WristSubsystem extends SubsystemBase{
     private final SparkClosedLoopController wrist_controller = wrist.getClosedLoopController();
 
     private double wrist_target = 0;
-    
+
     public WristSubsystem() {
         wrist_config
-          .idleMode(IdleMode.kBrake)
-          .inverted(false)
-          .smartCurrentLimit(40)
-          .voltageCompensation(12);
-        wrist_config
-            .closedLoop
-            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .outputRange(-1, 1)
-            .pid(0, 0, 0)
-            .maxMotion
-            .maxVelocity(10)
-            .maxAcceleration(5)
-            .allowedClosedLoopError(5);
-        wrist_config
-            .encoder
-            .positionConversionFactor(Constants.WristConstants.rotations_to_degrees);
+                .idleMode(IdleMode.kCoast)
+                .inverted(false)
+                .smartCurrentLimit(80)
+                .voltageCompensation(12);
+        wrist_config.closedLoop
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .outputRange(-1, 1)
+                .pid(0.1, 0, 0).maxMotion
+                .maxVelocity(10)
+                .maxAcceleration(5)
+                .allowedClosedLoopError(5);
+        wrist_config.encoder
+                .positionConversionFactor(Constants.WristConstants.rotations_to_degrees);
 
         wrist.configure(wrist_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -57,26 +54,26 @@ public class WristSubsystem extends SubsystemBase{
     }
 
     public double getWristPos() {
-      return wrist_encoder.getPosition();
+        return wrist_encoder.getPosition();
     }
 
     public void setWristPosition(double position) {
-      wrist_controller.setReference(position, ControlType.kMAXMotionPositionControl);
+        wrist_controller.setReference(position, ControlType.kMAXMotionPositionControl);
     }
 
     public Command rotateWrist(double target) {
-      return run(() -> setWristPosition(target));
+        return run(() -> setWristPosition(target));
     }
 
     public void setWristStatePivot(Constants.WristConstants.WristStates state) {
-      switch(state) {
-        case Stow:
-          wrist_target = Constants.WristConstants.stow_angle;
-          break;
-        case Intake:
-          wrist_target = Constants.WristConstants.intake_angle;
-          break;
-      }
-      setWristPosition(wrist_target);
+        switch (state) {
+            case Stow:
+                wrist_target = Constants.WristConstants.stow_angle;
+                break;
+            case Intake:
+                wrist_target = Constants.WristConstants.intake_angle;
+                break;
+        }
+        setWristPosition(wrist_target);
     }
 }

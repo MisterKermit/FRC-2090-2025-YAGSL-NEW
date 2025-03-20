@@ -6,22 +6,23 @@ import frc.robot.Constants.ScoringConstants.ScoringStates;
 import frc.robot.Constants.WristConstants.WristStates;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ScoringSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevationTarget;
 
 public class ScoringMacro extends Command {
-    private final ArmSubsystem arm;
-    private final ElevatorSubsystem elevator;
-    private final WristSubsystem wrist;
+    // private final ArmSubsystem arm;
+    // private final ElevatorSubsystem elevator;
+    // private final WristSubsystem wrist;
+
+    private final ScoringSubsystem scoring;
 
     private ScoringStates state;
     
-    public ScoringMacro(ArmSubsystem arm, ElevatorSubsystem elevator, WristSubsystem wrist, ScoringStates state) {
-        this.arm = arm;
-        this.elevator = elevator;
-        this.wrist = wrist;
+    public ScoringMacro(ScoringSubsystem scoring, ScoringStates state) {
+        this.scoring = scoring;
         this.state = state;
-        addRequirements(arm, elevator, wrist);
+        addRequirements(scoring);
     }
 
     public void initialize() {
@@ -32,15 +33,15 @@ public class ScoringMacro extends Command {
     public void execute() {
         switch (state) {
             case Stow:
-                arm.setArmStatePivot(ArmStates.Stow);
-                elevator.elevateCommandState(ElevationTarget.CoralIntake);
-                wrist.setWristStatePivot(WristStates.Stow);
+                scoring.setArmPivotState(state);
+                scoring.setWristState(state);
+                // .setElevatorState(state);
                 break;
         
             case Intake:
-                arm.setArmStatePivot(ArmStates.Intake);
-                elevator.elevateCommandState(ElevationTarget.L1);
-                wrist.setWristStatePivot(WristStates.Intake);
+                scoring.setArmPivotState(state);
+                // elevator.elevateCommandState(ElevationTarget.L1);
+                scoring.setArmPivotState(state);
                 break;
         }
     }

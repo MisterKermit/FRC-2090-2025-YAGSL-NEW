@@ -19,6 +19,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -36,71 +37,86 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.RobotMath.Arm;
+import frc.robot.Constants.ArmConstants.ArmStates;
 
-public class ArmSubsystem extends SubsystemBase{
-    
-    private SparkMax  arm = new SparkMax(Constants.ArmConstants.arm_id, SparkLowLevel.MotorType.kBrushless); 
-  
-    private SparkMaxConfig config = new SparkMaxConfig();
-    
+public class ArmSubsystem extends SubsystemBase {
 
-    private RelativeEncoder arm_encoder = arm.getEncoder();
+  private SparkMax arm = new SparkMax(Constants.ArmConstants.arm_id, SparkLowLevel.MotorType.kBrushless);
 
-    private final SparkClosedLoopController pidController = arm.getClosedLoopController();
+  private SparkMaxConfig config = new SparkMaxConfig();
 
-    private static double armsetPoint = 0;
-  
-    public ArmSubsystem() {
-      config
-          .idleMode(IdleMode.kBrake)
-          .inverted(false)
-          .smartCurrentLimit(40)
-          .voltageCompensation(12);
-      config
-        .closedLoop
+  private RelativeEncoder arm_encoder = arm.getEncoder();
+
+  private final SparkClosedLoopController pidController = arm.getClosedLoopController();
+
+  private static double armsetPoint = 0;
+
+  public ArmSubsystem() {
+    config
+        .idleMode(IdleMode.kCoast)
+        .inverted(true)
+        .smartCurrentLimit(40)
+        .voltageCompensation(12);
+    config.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .outputRange(-1, 1)
-        .pid(0, 0, 0)
-        .maxMotion
+        .pidf(0.1, 0, 0, 0).maxMotion
         .maxVelocity(10)
         .maxAcceleration(5)
-        .allowedClosedLoopError(5);
-      config
-        .encoder
-        .positionConversionFactor(Constants.ArmConstants.rotations_to_degrees);
+        .allowedClosedLoopError(1)
+        .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
+    config.encoder
+        .positionConversionFactor(Constants.ArmConstants.rotations_to_degrees)
+        .velocityConversionFactor(Constants.ArmConstants.velocity_conversion);
 
-      arm.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    }
+    arm_encoder.setPosition(0);
 
-    @Override
-    public void periodic() {
-      SmartDashboard.putNumber("Relative Enc pos", getAlgaeArmPosition());
-      SmartDashboard.putNumber("Arm Target Pos", armsetPoint);
-    }
+    arm.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
 
-    public double getAlgaeArmPosition() {
-      return arm_encoder.getPosition();
-    }
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber("Relative Enc pos", getAlgaeArmPosition());
+    SmartDashboard.putNumber("Arm Target Pos", armsetPoint);
+    SmartDashboard.putNumber("Arm Velocity", arm_encoder.getVelocity());
+  }
 
-    public void setAlgaeArmPosition(double position) {
-      pidController.setReference(position, ControlType.kMAXMotionPositionControl);
-    }
+  public double getAlgaeArmPosition() {
+    return arm_encoder.getPosition();
+  }
 
-    public Command rotateArm(double target) {
-      return run(() -> setAlgaeArmPosition(target));
-    }
+  public void setAlgaeArmPosition(double position) {
+    armsetPoint = position;
+    pidController.setReference(position, ControlType.kMAXMotionPositionControl);
+  }
 
-    public void setArmStatePivot(Constants.ArmConstants.ArmStates state) {
-      switch(state) {
-        case Stow:
-          armsetPoint = Constants.ArmConstants.stow_angle;
-          break;
-        case Intake:
-          armsetPoint = Constants.ArmConstants.intake_angle;
-          break;
-      }
-      setAlgaeArmPosition(armsetPoint);
+  public Command rotateArm(double target) {
+    return run(() -> setAlgaeArmPosition(target));
+  }
+
+  public void setArmStatePivot(Constants.ArmConstants.ArmStates state) {
+    switch (state) {
+      case Stow:
+        armsetPoint = Constants.ArmConstants.stow_angle;
+        break;
+      case Intake:
+        armsetPoint = Constants.ArmConstants.intake_angle;
+        break;
     }
-    
+    setAlgaeArmPosition(armsetPoint);
+  }
+
+  public Command setStateArm(ArmStates states) {
+    return run(() -> setArmStatePivot(states));
+  }
+
+  // Temp testing commnands
+  public Command runArmUp() {
+    return run(() -> arm.set(1));
+  }
+
+  public Command runArmDown() {
+    return run(() -> arm.set(-10));
+  }
+
 }

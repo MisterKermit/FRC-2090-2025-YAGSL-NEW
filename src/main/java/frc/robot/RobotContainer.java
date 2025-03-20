@@ -5,6 +5,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,16 +22,21 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.ArmConstants.ArmStates;
 import frc.robot.Constants.ScoringConstants.ScoringStates;
 import frc.robot.commands.swervedrive.ScoringMacro;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.Hang;
+import frc.robot.subsystems.ScoringSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevationTarget;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+
+import org.ironmaple.simulation.IntakeSimulation.IntakeSide;
+
 import swervelib.SwerveInputStream;
 
 /**
@@ -50,9 +57,11 @@ public class RobotContainer {
 
   private final ElevatorSubsystem elevator = new ElevatorSubsystem();
 
-  private final ArmSubsystem arm = new ArmSubsystem();
+  private final ScoringSubsystem scoring = new ScoringSubsystem();
 
-  private final WristSubsystem wrist = new WristSubsystem();
+  // private final ArmSubsystem arm = new ArmSubsystem();
+
+  // private final WristSubsystem wrist = new WristSubsystem();
 
   private final VisionSubsystem vision = new VisionSubsystem("limelight");
 
@@ -150,9 +159,29 @@ public class RobotContainer {
     Command ManualControlElevator = elevator.manualElevationCommand(driverXbox);
     // Command ManualArm = arm.manualArm(driverXbox);
     Command HangSequence = hang.hangCommand(driverXbox);
+    // Command SetArmPivot = arm.setStateArm(ArmStates.Stow);
     // Command ArmReset = arm.moveArmToPosition(0);
     // Command ArmIntake = arm.rotateArm(0.5);
     // Command RotateArmTest = arm.rotateArm(40);
+
+    // Command ArmUp = arm.runArmUp();
+    // Command ArmDown = arm.runArmDown();
+
+    Trigger YAxisJoystickTrigger = new Trigger(() -> {
+      if (MathUtil.applyDeadband(driverXbox.getLeftY(), 0.01) > 0.01|| 
+          MathUtil.applyDeadband(driverXbox.getLeftY(), 0.01) < -0.01 ||
+          MathUtil.applyDeadband(driverXbox.getRightY(), 0.01) > 0.01 || 
+          MathUtil.applyDeadband(driverXbox.getRightY(), 0.01) < -0.01) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    YAxisJoystickTrigger
+      .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.01), 
+                                                 () -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.01)))
+      .onFalse(scoring.stopWholeArm());
     
     if (RobotBase.isSimulation()) {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
@@ -210,8 +239,12 @@ public class RobotContainer {
       // driverXbox.x().onTrue(elevator.elevateCommand(ElevationTarget.L2));
       // driverXbox.povUp().whileTrue(HangSequence);
       // driverXbox.y().onTrue(elevator.elevateCommand(ElevationTarget.CoralIntake));
-      driverXbox.x().onTrue(new ScoringMacro(arm, elevator, wrist, ScoringStates.Stow));
-      driverXbox.y().onTrue(new ScoringMacro(arm, elevator, wrist, ScoringStates.Intake));
+      // driverXbox.y().onTrue(RotateArmTest);
+      driverXbox.x().onTrue(new ScoringMacro(scoring, ScoringStates.Stow));
+      // driverXbox.y().onTrue(new ScoringMacro(arm, elevator, wrist, ScoringStates.Intake));
+      // driverXbox.x().onTrue(SetArmPivot);
+      // driverXbox.y().onTrue(ArmUp);
+      // driverXbox.y().onTrue(ArmDown);
       // driverXbox.leftBumper().whileTrue(ArmIntake);
     }
 

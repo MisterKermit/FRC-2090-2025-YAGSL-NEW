@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import edu.wpi.first.units.Units;
 
-
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -27,7 +26,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 public class ElevatorSubsystem extends SubsystemBase {
-  
+
   // We have two Falcon 500s
   // TODO: Specify CAN IDss
   private static final TalonFX leftMotorFollower = new TalonFX(13, "Elevator");
@@ -43,25 +42,27 @@ public class ElevatorSubsystem extends SubsystemBase {
   double targetPosition = 0;
 
   public static TalonFXConfiguration Elevator_Config = new TalonFXConfiguration();
-  static{
+  static {
 
     Elevator_Config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    Elevator_Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.ElevatorConstants.MAX_HEIGHT_INCHES; // Test Upper Limit
+    Elevator_Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.ElevatorConstants.MAX_HEIGHT_INCHES; // Test
+                                                                                                                   // Upper
+                                                                                                                   // Limit
     Elevator_Config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
     Elevator_Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.ElevatorConstants.MIN_HEIGHT_INCHES;
-    
+
     Elevator_Config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     Elevator_Config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    
+
     Elevator_Config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
     Elevator_Config.Feedback.SensorToMechanismRatio = Constants.ElevatorConstants.ELEVATION_GEAR_RATIO;
 
-    //TODO: Elevator Overshoot issue, tune kD and kV, kP
-    Elevator_Config.Slot0.kG = 0.8; //0.3 
-    Elevator_Config.Slot0.kS = 0.05; //0.4
-    Elevator_Config.Slot0.kV = 0.002; //0.001
-    Elevator_Config.Slot0.kA = 0.001; //0.0
-    Elevator_Config.Slot0.kP = 0.5; //0.5
+    // TODO: Elevator Overshoot issue, tune kD and kV, kP
+    Elevator_Config.Slot0.kG = 0.8; // 0.3
+    Elevator_Config.Slot0.kS = 0.05; // 0.4
+    Elevator_Config.Slot0.kV = 0.002; // 0.001
+    Elevator_Config.Slot0.kA = 0.001; // 0.0
+    Elevator_Config.Slot0.kP = 0.5; // 0.5
     Elevator_Config.Slot0.kI = 0.0;
     Elevator_Config.Slot0.kD = 0.0;
     Elevator_Config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
@@ -90,7 +91,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     resetSensorPosition(Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
   }
 
-  public double getElevatorPosition(){
+  public double getElevatorPosition() {
     return rightMotorLeader.getPosition().getValueAsDouble();
   }
 
@@ -112,17 +113,19 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command elevateCommandState(ElevationTarget target) {
     return elevateCommand(target.getValue());
   }
-  
+
   private class ElevateCommand extends Command {
     private double elevateTarget;
 
-    private static final double ELEVATE_COMMAND_DEADBAND = 0.25; //inches
+    private static final double ELEVATE_COMMAND_DEADBAND = 0.25; // inches
 
     public ElevateCommand(ElevatorSubsystem elevator, double elevateTarget) {
-      elevateTarget = Math.max(Math.min(elevateTarget, Constants.ElevatorConstants.MAX_HEIGHT_INCHES), Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
+      elevateTarget = Math.max(Math.min(elevateTarget, Constants.ElevatorConstants.MAX_HEIGHT_INCHES),
+          Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
       this.elevateTarget = elevateTarget;
       addRequirements(elevator);
-      // It's fine to ignore the joystick because the profile should not take very long
+      // It's fine to ignore the joystick because the profile should not take very
+      // long
     }
 
     @Override // every 20ms
@@ -150,28 +153,26 @@ public class ElevatorSubsystem extends SubsystemBase {
     L2(24.899),
     L3(40.298),
     AlgaeL2(20.899),
-    AlgaeL3(36.899)
-    ;
+    AlgaeL3(36.899);
 
     private double targetValue;
+
     private ElevationTarget(double targetValue) {
       this.targetValue = targetValue;
     }
+
     public double getValue() {
       return targetValue;
     }
   }
 
-
   private class ManualElevationCommand extends Command {
     private final CommandXboxController controller;
-
 
     public ManualElevationCommand(ElevatorSubsystem elevator, CommandXboxController controller) {
       this.controller = controller;
       addRequirements(elevator);
     }
-
 
     @Override
     public void initialize() {
@@ -187,7 +188,8 @@ public class ElevatorSubsystem extends SubsystemBase {
       }
 
       // Clamp the target position to within the valid elevator range
-      targetPosition = Math.max(Math.min(targetPosition, Constants.ElevatorConstants.MAX_HEIGHT_INCHES), Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
+      targetPosition = Math.max(Math.min(targetPosition, Constants.ElevatorConstants.MAX_HEIGHT_INCHES),
+          Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
 
       // Continuously set the elevator to the last stored target position
       setPosition(targetPosition);
@@ -197,12 +199,12 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command manualElevationCommand(CommandXboxController controller) {
     return new ManualElevationCommand(this, controller);
   }
- 
+
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Elevator Target", targetPosition);
     SmartDashboard.putNumber("Elevator Height", getElevatorPosition());
-    SmartDashboard.putNumber("Motion Magic is Running", rightMotorLeader.getMotionMagicIsRunning().getValue().value );
+    SmartDashboard.putNumber("Motion Magic is Running", rightMotorLeader.getMotionMagicIsRunning().getValue().value);
   }
 
 }

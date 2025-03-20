@@ -139,6 +139,34 @@ public class RobotContainer {
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
+
+    NamedCommands.registerCommand("extendElevatorToL3", elevator.elevateCommandState(ElevatorSubsystem.ElevationTarget.L3));
+    NamedCommands.registerCommand("retractElevatorToMin", elevator.elevateCommand(Constants.ElevatorConstants.MIN_HEIGHT_INCHES));
+    NamedCommands.registerCommand("extendElevatorToCoralIntake", elevator.elevateCommandState(ElevatorSubsystem.ElevationTarget.CoralIntake));
+
+    // following is for scoring (arm and wrist are currently seperate)
+    NamedCommands.registerCommand("scoringStow",
+    new ParallelCommandGroup(
+        scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.Stow),
+        Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.Stow))
+        )
+    );
+
+    NamedCommands.registerCommand("scoringIntake",
+    new ParallelCommandGroup(
+        scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.Intake),
+        Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.Intake))
+        )
+    );
+
+// THE FOLLOWING IS FOR THE L3 SCORING STATE THAT HAS NOT YET BEEN MADE YET
+    NamedCommands.registerCommand("scoringL3",
+    new ParallelCommandGroup(
+        scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.L3),
+        Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.L3))
+        )
+    );
+
   }
 
   /**

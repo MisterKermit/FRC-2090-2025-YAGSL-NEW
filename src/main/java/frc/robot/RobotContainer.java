@@ -269,6 +269,7 @@ public class RobotContainer {
       case MANUAL:
         operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL));
+        operatorXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL))
         YAxisJoystickTrigger
         .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-operatorXbox.getLeftY(), 0.01), 
                                                   () -> MathUtil.applyDeadband(-operatorXbox.getRightY(), 0.01)))

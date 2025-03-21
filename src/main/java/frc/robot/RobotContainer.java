@@ -234,10 +234,10 @@ public class RobotContainer {
     // Command ArmDown = arm.runArmDown();
 
     Trigger YAxisJoystickTrigger = new Trigger(() -> {
-      if (MathUtil.applyDeadband(driverXbox.getLeftY(), 0.01) > 0.01|| 
-          MathUtil.applyDeadband(driverXbox.getLeftY(), 0.01) < -0.01 ||
-          MathUtil.applyDeadband(driverXbox.getRightY(), 0.01) > 0.01 || 
-          MathUtil.applyDeadband(driverXbox.getRightY(), 0.01) < -0.01) {
+      if (MathUtil.applyDeadband(operatorXbox.getLeftY(), 0.01) > 0.01|| 
+          MathUtil.applyDeadband(operatorXbox.getLeftY(), 0.01) < -0.01 ||
+          MathUtil.applyDeadband(operatorXbox.getRightY(), 0.01) > 0.01 || 
+          MathUtil.applyDeadband(operatorXbox.getRightY(), 0.01) < -0.01) {
         return true;
       } else {
         return false;

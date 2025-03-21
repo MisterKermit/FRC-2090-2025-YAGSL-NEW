@@ -33,8 +33,6 @@ public class ElevatorCommand extends Command {
     @Override
     public void end(boolean isInterrupted) {
       elevator.setPosition(elevator.getElevatorPosition());
-      // elevator.holdPosition();
-      // elevator.stopPosition();
     }
 
     @Override

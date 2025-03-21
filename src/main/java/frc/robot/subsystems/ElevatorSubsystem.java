@@ -42,15 +42,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   PositionVoltage positionRequest;
   VoltageOut voltageRequest = new VoltageOut(0);
 
-  double currentLeftPosition = 0;
-  double currentRightPosition = 0;
   double targetPosition = 0;
-
-  private final PIDController pidController;
-  private final double kP = 0.05;  // Tune these values
-  private final double kI = 0.0;
-  private final double kD = 0.0;
-  private final double kGravityFeedforward = 0.05;
 
   public static TalonFXConfiguration Elevator_Config = new TalonFXConfiguration();
   static {
@@ -105,9 +97,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     voltageRequest = new VoltageOut(0);
     motionRequest = new MotionMagicVoltage(0);
     resetSensorPosition(Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
-
-    pidController = new PIDController(kP, kI, kD);
-    pidController.setTolerance(0.1); 
   }
 
   public double getElevatorPosition() {
@@ -117,16 +106,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void setPosition(double height) {
     rightMotorLeader.setControl(motionRequest.withPosition(height));
     targetPosition = height;
-  }
-
-  public void holdPosition() {
-     // Get current encoder position
-    double currentPosition = getElevatorPosition();
-    double pidOutput = pidController.calculate(currentPosition, targetPosition);
-    double output = pidOutput + kGravityFeedforward;  // Feedforward to counteract gravity
-        
-    rightMotorLeader.set(output);
-
   }
 
   public void stopPosition() {
@@ -152,14 +131,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         break;
     }
   }
-  // public Command elevateCommand(double target) {
-  //   return new ElevateCommand(this, target);
-  // }
-
-  // public Command elevateCommandState(ElevationTarget target) {
-  //   return elevateCommand(target.getValue());
-  // }
-
   
   @Override
   public void periodic() {

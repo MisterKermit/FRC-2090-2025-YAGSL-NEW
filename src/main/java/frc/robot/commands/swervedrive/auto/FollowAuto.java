@@ -1,19 +1,19 @@
-package frc.robot.commands;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.SwerveDrive;
+package frc.robot.commands.swervedrive.auto;
+
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
+import edu.wpi.first.wpilibj2.command.Command;
+
 
 // YAGSL drive system instea of swerve drive
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
-public class FollowAuto extends CommandBase {
+public class FollowAuto extends Command {
   private final SwerveSubsystem swerveSubsystem;
   private final Command autoCommand;
 
-  public FollowPathAuto(SwerveDrive swerveDrive) {
-    this.swerveSubsystem = swerveSubsystem;
+  public FollowAuto(SwerveSubsystem swerveDrive) {
+    this.swerveSubsystem = swerveDrive;
     autoCommand = new PathPlannerAuto("center_preload_blue_auto");
     addRequirements(swerveSubsystem);
   }

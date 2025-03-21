@@ -205,6 +205,7 @@ public class RobotContainer {
    * Flight joysticks}.
    */
   private void configureBindings() {
+    
     // Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
     // Command driveSlowFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveSlowAngularVelocity);
@@ -251,6 +252,7 @@ public class RobotContainer {
         operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
         operatorXbox.b().whileTrue(cIntake.runCoralIntake());
         operatorXbox.x().whileTrue(cIntake.reverseCoralIntake());
+        operatorXbox.y().onTrue(new DriveToAprilTag(drivebase, vision));
         operatorXbox.leftBumper().whileTrue(aIntake.runAlgaeIntake());
         operatorXbox.rightBumper().whileTrue(aIntake.reverseAlgaeIntake());
         // driverXbox.b().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Stow));

@@ -10,19 +10,41 @@ public class DriveToAprilTag extends Command {
 
     private final VisionSubsystem limelightSubsystem;
 
+    private Command driveToPoseCommand;
+
     public DriveToAprilTag(SwerveSubsystem swerb, VisionSubsystem limelight) {
-        this.driveTrain = swerb;
-        this.limelightSubsystem = limelight;
-        addRequirements(swerb, limelight);
+        this.driveTrain = driveTrain;
+        this.limelightSubsystem = limelightSubsystem;
+        addRequirements(driveTrain, limelight);
+    }
+
+    @Override
+    public void initialize() {
+        var visionEstimate = limelightSubsystem.GetVisionEstimate();
+        if (visionEstimate != null && visionEstimate.pose != null) {
+            Pose2d targetPose = visionEstimate.pose;
+
+            driveToPoseCommand = driveTrain.driveToPoseWithVision(targetPose, limelightSubsystem);
+            driveToPoseCommand.initialize();
+        } else {
+            System.out.println("no tag available for detection");
+            driveToPoseCommand = null;
+        }
     }
 
     @Override
     public void execute() {
+        if (driveToPoseCommand != null) {
+            driveToPoseCommand.execute();
+        }   
 
     }
 
     @Override
     public void end(boolean isInterrupted) {
+        if (driveToPoseCommand != null) {
+            driveToPoseCommand.end(interrupted);
+        }
 
     }
 

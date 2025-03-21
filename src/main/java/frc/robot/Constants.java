@@ -75,7 +75,7 @@ public final class Constants {
       Intake
     }
 
-    public static double stow_angle = 40;
+    public static double stow_angle = 0;
     public static double intake_angle = 0;
 
   }
@@ -90,8 +90,8 @@ public final class Constants {
       Intake
     }
 
-    public static double stow_angle = 30;
-    public static double intake_angle = 0;
+    public static double stow_angle = 0;
+    public static double intake_angle = 50;
 
   }
 
@@ -99,16 +99,39 @@ public final class Constants {
     public static final double MAX_VOLTAGE = 3.0;
     public static final double JOYSTICK_DEADBAND = 0.12;
     public static final double MAX_HEIGHT_INCHES = 46;
-    public static final double MIN_HEIGHT_INCHES = 3;
+    public static final double MIN_HEIGHT_INCHES = 11.5;
 
     //check if inches are consistent
     public static double ELEVATION_GEAR_RATIO = 6.12 / (1.273 * Math.PI * 2);
+
+    public enum ElevationTarget {
+      // https://www.desmos.com/calculator/ocl2iqiu7n
+      // Unit: inches
+      //tune tommorow
+      CoralIntake(12),
+      L1(15),
+      L2(24.899),
+      L3(40.298),
+      AlgaeL2(20.899),
+      AlgaeL3(36.899);
+  
+      private double targetValue;
+  
+      private ElevationTarget(double targetValue) {
+        this.targetValue = targetValue;
+      }
+  
+      public double getValue() {
+        return targetValue;
+      }
+    }
+  
   }
 
   public static class ScoringConstants {
     public enum ScoringStates {
       Stow,
-      Intake
+      Intake,
       // L1,
       // L2,
       // L3,

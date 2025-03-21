@@ -7,6 +7,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import java.nio.file.attribute.PosixFilePermission;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -22,18 +25,20 @@ import frc.robot.Constants;
 
 public class AlgaeIntake extends SubsystemBase {
     //TODO: tune canid
-    private TalonFX algae_intake = new TalonFX(19); 
+    private SparkMax algae_intake = new SparkMax(17, MotorType.kBrushless); 
     
-    private static TalonFXConfiguration config = new TalonFXConfiguration();
+    private static SparkMaxConfig config = new SparkMaxConfig();
     static {
-        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config
+            .inverted(false)
+            .idleMode(IdleMode.kBrake);
+
     }
 
     private double intakeAlgaeSpeed = 0.5;
 
     public AlgaeIntake() {
-        algae_intake.getConfigurator().apply(config);
+        algae_intake.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
@@ -41,11 +46,11 @@ public class AlgaeIntake extends SubsystemBase {
         
     }
 
-    public Command runIntakeAlgae() {
+    public Command runAlgaeIntake() {
         return run(() -> algae_intake.set(intakeAlgaeSpeed));
     }
 
-    public Command reverseIntakeAlgae() {
+    public Command reverseAlgaeIntake() {
         return run(() -> algae_intake.set(-intakeAlgaeSpeed));
     }
 

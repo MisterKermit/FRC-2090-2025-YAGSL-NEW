@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
@@ -10,9 +11,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.Constants.ElevatorConstants.ElevationTarget;
 import frc.robot.Constants.ScoringConstants.ScoringStates;
 import edu.wpi.first.units.Units;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -42,6 +46,12 @@ public class ElevatorSubsystem extends SubsystemBase {
   double currentRightPosition = 0;
   double targetPosition = 0;
 
+  private final PIDController pidController;
+  private final double kP = 0.05;  // Tune these values
+  private final double kI = 0.0;
+  private final double kD = 0.0;
+  private final double kGravityFeedforward = 0.05;
+
   public static TalonFXConfiguration Elevator_Config = new TalonFXConfiguration();
   static {
 
@@ -60,7 +70,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // TODO: Elevator Overshoot issue, tune kD and kV, kP
     Elevator_Config.Slot0.kG = 0.8; // 0.3
-    Elevator_Config.Slot0.kS = 0.05; // 0.4
+    Elevator_Config.Slot0.kS = 0.3; // 0.4
     Elevator_Config.Slot0.kV = 0.002; // 0.001
     Elevator_Config.Slot0.kA = 0.001; // 0.0
     Elevator_Config.Slot0.kP = 0.5; // 0.5
@@ -83,6 +93,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     rightMotorLeader.getConfigurator().apply(Elevator_Config);
     leftMotorFollower.getConfigurator().apply(Elevator_Config);
     topMotorFollower.getConfigurator().apply(Elevator_Config);
+    
+
+    rightMotorLeader.clearStickyFault_BootDuringEnable();
+    leftMotorFollower.clearStickyFault_BootDuringEnable();
+    topMotorFollower.clearStickyFault_BootDuringEnable();
     // TODO: Use a non-deprecated method
     // Invert the left motor
     leftMotorFollower.setControl(new Follower(rightMotorLeader.getDeviceID(), false));
@@ -90,6 +105,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     voltageRequest = new VoltageOut(0);
     motionRequest = new MotionMagicVoltage(0);
     resetSensorPosition(Constants.ElevatorConstants.MIN_HEIGHT_INCHES);
+
+    pidController = new PIDController(kP, kI, kD);
+    pidController.setTolerance(0.1); 
   }
 
   public double getElevatorPosition() {
@@ -99,6 +117,22 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void setPosition(double height) {
     rightMotorLeader.setControl(motionRequest.withPosition(height));
     targetPosition = height;
+  }
+
+  public void holdPosition() {
+     // Get current encoder position
+    double currentPosition = getElevatorPosition();
+    double pidOutput = pidController.calculate(currentPosition, targetPosition);
+    double output = pidOutput + kGravityFeedforward;  // Feedforward to counteract gravity
+        
+    rightMotorLeader.set(output);
+
+  }
+
+  public void stopPosition() {
+    rightMotorLeader.stopMotor();
+    leftMotorFollower.stopMotor();
+    topMotorFollower.stopMotor();
   }
 
   public void resetSensorPosition(double height) {
@@ -114,7 +148,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         break;
     
       case Intake:
-        setPosition(ElevationTarget.L1.getValue());
+        setPosition(ElevationTarget.CoralIntake.getValue());
         break;
     }
   }
@@ -126,28 +160,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   //   return elevateCommand(target.getValue());
   // }
 
-  public enum ElevationTarget {
-    // https://www.desmos.com/calculator/ocl2iqiu7n
-    // Unit: inches
-    //tune tommorow
-    CoralIntake(3),
-    L1(13.899),
-    L2(24.899),
-    L3(40.298),
-    AlgaeL2(20.899),
-    AlgaeL3(36.899);
-
-    private double targetValue;
-
-    private ElevationTarget(double targetValue) {
-      this.targetValue = targetValue;
-    }
-
-    public double getValue() {
-      return targetValue;
-    }
-  }
-
+  
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Elevator Target", targetPosition);

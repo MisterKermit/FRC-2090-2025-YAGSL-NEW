@@ -1,14 +1,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ArmConstants.ArmStates;
 import frc.robot.Constants.ScoringConstants.ScoringStates;
 import frc.robot.Constants.WristConstants.WristStates;
-import frc.robot.subsystems.CoralIntake;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ScoringSubsystem;
 import frc.robot.subsystems.AlgaeIntake;
-import frc.robot.subsystems.ElevatorSubsystem.ElevationTarget;
 
 public class ScoringMacro extends Command {
     // private final ArmSubsystem arm;
@@ -42,9 +43,11 @@ public class ScoringMacro extends Command {
                 break;
         
             case Intake:
-                scoring.setArmPivotState(state);
-                elevator.setElevatorState(state);
-                scoring.setArmPivotState(state);
+                scoring.reachArmPivotTarget(ArmConstants.intake_angle);
+                // scoring.setArmPivotState(state);
+                // elevator.setElevatorState(state);
+                scoring.reachWristTarget(WristConstants.intake_angle);
+                // scoring.setArmPivotState(state);
                 break;
         }
     }

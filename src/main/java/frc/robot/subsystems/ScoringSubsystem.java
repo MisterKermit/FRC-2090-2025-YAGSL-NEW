@@ -64,7 +64,7 @@ public class ScoringSubsystem extends SubsystemBase {
         armPivotConfig
                 .inverted(true)
                 .idleMode(IdleMode.kBrake)
-                .smartCurrentLimit(80)
+                .smartCurrentLimit(  80)
                 .voltageCompensation(12);
         armPivotConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -72,7 +72,7 @@ public class ScoringSubsystem extends SubsystemBase {
                 .outputRange(-1, 1)
                 .maxMotion
                 .maxVelocity(300000)
-                .maxAcceleration(60000)
+                .maxAcceleration( 60000)
                 .allowedClosedLoopError(1)
                 .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
         armPivotConfig.encoder
@@ -101,8 +101,8 @@ public class ScoringSubsystem extends SubsystemBase {
                 .velocityConversionFactor(360 / 60);
 
 
-        armPivotEncoder.setPosition(0);
-        wristEncoder.setPosition(0);
+        // armPivotEncoder.setPosition(0);
+        // wristEncoder.setPosition(0);
         // set configs for motors
         armPivot.configure(armPivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         wrist.configure(wristConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -218,6 +218,7 @@ public class ScoringSubsystem extends SubsystemBase {
         }
         currentState = state;
     }
+
 
     public ScoringStates returnState() {
         return currentState;

@@ -45,7 +45,7 @@ import frc.robot.Constants.ArmConstants.ArmStates;
 
 public class CoralIntake extends SubsystemBase {
   //TODO: match up can ids later
-  private TalonFX arm_intake = new TalonFX(17);
+  private TalonFX coral_intake = new TalonFX(20, "Elevator");
 
   //tune direction
   private static TalonFXConfiguration config = new TalonFXConfiguration();
@@ -57,7 +57,7 @@ public class CoralIntake extends SubsystemBase {
   private double coralIntakeSpeed = 0.5;
 
   public CoralIntake() {
-    arm_intake.getConfigurator().apply(config);
+    coral_intake.getConfigurator().apply(config);
 
   }
 
@@ -67,11 +67,11 @@ public class CoralIntake extends SubsystemBase {
   }
   
   public Command runCoralIntake() {
-    return run(() -> arm_intake.set(coralIntakeSpeed));
+    return run(() -> coral_intake.set(coralIntakeSpeed));
   }
 
   public Command reverseCoralIntake() {
-    return run(() -> arm_intake.set(-coralIntakeSpeed));
+    return run(() -> coral_intake.set(-coralIntakeSpeed));
   }
  
 

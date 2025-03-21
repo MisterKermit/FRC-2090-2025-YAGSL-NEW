@@ -20,22 +20,25 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.OperatorConstants.RobotStates;
 import frc.robot.Constants.ArmConstants.ArmStates;
+import frc.robot.Constants.ElevatorConstants.ElevationTarget;
 import frc.robot.Constants.ScoringConstants.ScoringStates;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.ManualElevationCommand;
 import frc.robot.commands.ScoringMacro;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.Hang;
 import frc.robot.subsystems.ScoringSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.AlgaeIntake;
-import frc.robot.subsystems.ElevatorSubsystem.ElevationTarget;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import java.lang.management.OperatingSystemMXBean;
@@ -72,7 +75,7 @@ public class RobotContainer {
 
   private final VisionSubsystem vision = new VisionSubsystem("limelight");
 
-  private final Hang hang = new Hang();
+  // private final Hang hang = new Hang();
 
   private static RobotStates currentRoboState = RobotStates.NORMAL;
 
@@ -86,8 +89,8 @@ public class RobotContainer {
       () -> driverXbox.getLeftY() * -0.5,
       () -> driverXbox.getLeftX() * -0.5)
       .withControllerRotationAxis(driverXbox::getRightX)
-      .deadband(OperatorConstants.DEADBAND)
-      .scaleTranslation(1)
+      .deadband(OperatorConstants.DEADBAND) 
+      .scaleTranslation(slowMode || scoring.returnState() != ScoringStates.Stow ? 1 : 0.5)
       .allianceRelativeControl(true);
 
   SwerveInputStream driveSlowAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
@@ -143,7 +146,7 @@ public class RobotContainer {
           0));
 
   public Command IntakeSETPOS() {
-    return scoring.setArmPivotStateCommand(ScoringStates.Stow).andThen(new ElevatorCommand(elevator, ElevationTarget.CoralIntake.getValue()));
+    return scoring.setArmPivotStateCommand(ScoringStates.Intake).andThen(new ElevatorCommand(elevator, ElevationTarget.CoralIntake.getValue()));
   }
 
   public Command slowModeToggle(boolean isSlow) {
@@ -158,32 +161,33 @@ public class RobotContainer {
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
 
-    NamedCommands.registerCommand("extendElevatorToL3", elevator.elevateCommandState(ElevatorSubsystem.ElevationTarget.L3));
-    NamedCommands.registerCommand("retractElevatorToMin", elevator.elevateCommand(Constants.ElevatorConstants.MIN_HEIGHT_INCHES));
-    NamedCommands.registerCommand("extendElevatorToCoralIntake", elevator.elevateCommandState(ElevatorSubsystem.ElevationTarget.CoralIntake));
+    //Currently Broken
+//     NamedCommands.registerCommand("extendElevatorToL3", elevator.elevateCommandState(ElevatorSubsystem.ElevationTarget.L3));
+//     NamedCommands.registerCommand("retractElevatorToMin", elevator.elevateCommandState(Constants.ElevatorConstants.MIN_HEIGHT_INCHES));
+//     NamedCommands.registerCommand("extendElevatorToCoralIntake", elevator.elevateCommandState(ElevatorSubsystem.ElevationTarget.CoralIntake));
 
-    // following is for scoring (arm and wrist are currently seperate)
-    NamedCommands.registerCommand("scoringStow",
-    new ParallelCommandGroup(
-        scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.Stow),
-        Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.Stow))
-        )
-    );
+//     // following is for scoring (arm and wrist are currently seperate)
+//     NamedCommands.registerCommand("scoringStow",
+//     new ParallelCommandGroup(
+//         scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.Stow),
+//         Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.Stow))
+//         )
+//     );
 
-    NamedCommands.registerCommand("scoringIntake",
-    new ParallelCommandGroup(
-        scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.Intake),
-        Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.Intake))
-        )
-    );
+//     NamedCommands.registerCommand("scoringIntake",
+//     new ParallelCommandGroup(
+//         scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.Intake),
+//         Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.Intake))
+//         )
+//     );
 
-// THE FOLLOWING IS FOR THE L3 SCORING STATE THAT HAS NOT YET BEEN MADE YET
-    NamedCommands.registerCommand("scoringL3",
-    new ParallelCommandGroup(
-        scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.L3),
-        Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.L3))
-        )
-    );
+// // THE FOLLOWING IS FOR THE L3 SCORING STATE THAT HAS NOT YET BEEN MADE YET
+//     NamedCommands.registerCommand("scoringL3",
+//     new ParallelCommandGroup(
+//         scoring.setArmPivotStateCommand(ScoringConstants.ScoringStates.L3),
+//         Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.L3))
+//         )
+//     );
 
   }
 
@@ -203,7 +207,7 @@ public class RobotContainer {
   private void configureBindings() {
     // Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command driveSlowFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveSlowAngularVelocity);
+    // Command driveSlowFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveSlowAngularVelocity);
     // Command driveRobotOrientedAngularVelocity = drivebase.driveFieldOriented(driveRobotOriented);
     // Command driveSetpointGen = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
     // Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
@@ -211,9 +215,15 @@ public class RobotContainer {
     // Command driveSetpointGenKeyboard = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleKeyboard);
     Command ManualControlElevator = new ManualElevationCommand(elevator, driverXbox);
     // Command ManualArm = arm.manualArm(driverXbox);
-    Command HangSequence = hang.hangCommand(driverXbox);
+    // Command HangSequence = hang.hangCommand(driverXbox);
 
     
+    // if (slowMode || scoring.returnState() != ScoringStates.Stow) {
+    //   drivebase.setDefaultCommand(driveSlowFieldOrientedAngularVelocity);
+    // } else {
+    //   drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    // }
+    drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     
     // Command SetArmPivot = arm.setStateArm(ArmStates.Stow);
     // Command ArmReset = arm.moveArmToPosition(0);
@@ -234,22 +244,23 @@ public class RobotContainer {
       }
     });
 
-    
+    driverXbox.x().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Intake));
+
     switch (currentRoboState) {
       case NORMAL:
         operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
         operatorXbox.b().whileTrue(cIntake.runCoralIntake());
         operatorXbox.x().whileTrue(cIntake.reverseCoralIntake());
-        operatorXbox.leftBumper().whileTrue(aIntake.runIntakeAlgae());
-        operatorXbox.rightBumper().whileTrue(aIntake.reverseIntakeAlgae());
-        driverXbox.x().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Stow));
+        operatorXbox.leftBumper().whileTrue(aIntake.runAlgaeIntake());
+        operatorXbox.rightBumper().whileTrue(aIntake.reverseAlgaeIntake());
+        // driverXbox.b().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Stow));
+        driverXbox.y().onTrue(IntakeSETPOS());
+        // driverXbox.x().onTrue(new ElevatorCommand(elevator,ElevationTarget.L1.getValue()));
         driverXbox.leftBumper().onTrue(slowModeToggle(slowMode));
+        // operatorXbox.povUp()
+        //   .whileTrue(new InstantCommand(() -> hang.setPower(-0.5)))
+        //   .whileFalse(new InstantCommand(() -> hang.setPower(0)));
         driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.MANUAL));
-        if (slowMode || scoring.returnState() != ScoringStates.Stow) {
-          drivebase.setDefaultCommand(driveSlowFieldOrientedAngularVelocity);
-        } else {
-          drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-        }
         break;
 
       case MANUAL:
@@ -260,11 +271,6 @@ public class RobotContainer {
                                                   () -> MathUtil.applyDeadband(-operatorXbox.getRightY(), 0.01)))
         .onFalse(scoring.stopWholeArm());
         driverXbox.leftBumper().onTrue(slowModeToggle(slowMode));
-        if (slowMode || scoring.returnState() != ScoringStates.Stow) {
-          drivebase.setDefaultCommand(driveSlowFieldOrientedAngularVelocity);
-        } else {
-          drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-        }
         break;
     }
       

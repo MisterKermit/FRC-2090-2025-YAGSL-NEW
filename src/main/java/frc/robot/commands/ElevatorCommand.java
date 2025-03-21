@@ -11,7 +11,7 @@ public class ElevatorCommand extends Command {
 
     private ElevatorSubsystem elevator;
 
-    private static final double ELEVATE_COMMAND_DEADBAND = 0.25; // inches
+    private static final double ELEVATE_COMMAND_DEADBAND = 0.5; // inches
 
     public ElevatorCommand(ElevatorSubsystem elevator, double elevateTarget) {
         this.elevator = elevator;
@@ -33,6 +33,8 @@ public class ElevatorCommand extends Command {
     @Override
     public void end(boolean isInterrupted) {
       elevator.setPosition(elevator.getElevatorPosition());
+      // elevator.holdPosition();
+      // elevator.stopPosition();
     }
 
     @Override

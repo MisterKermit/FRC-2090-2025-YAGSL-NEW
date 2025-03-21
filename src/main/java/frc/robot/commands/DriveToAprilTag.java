@@ -12,7 +12,7 @@ public class DriveToAprilTag extends Command {
 
     private Command driveToPoseCommand;
 
-    public DriveToAprilTag(SwerveSubsystem swerb, VisionSubsystem limelight) {
+    public DriveToAprilTag(SwerveSubsystem driveTrain, VisionSubsystem limelightSubsystem) {
         this.driveTrain = driveTrain;
         this.limelightSubsystem = limelightSubsystem;
         addRequirements(driveTrain, limelight);

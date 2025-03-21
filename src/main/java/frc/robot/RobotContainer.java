@@ -261,6 +261,7 @@ public class RobotContainer {
         //   .whileTrue(new InstantCommand(() -> hang.setPower(-0.5)))
         //   .whileFalse(new InstantCommand(() -> hang.setPower(0)));
         driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.MANUAL));
+        operatorXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.MANUAL));
         break;
 
       case MANUAL:

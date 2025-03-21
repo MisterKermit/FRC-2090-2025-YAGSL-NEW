@@ -120,7 +120,7 @@ public class ScoringSubsystem extends SubsystemBase {
 
     public void reachArmPivotTarget(double target) {
         armAngleSetPoint = target;
-        armPivotController.setReference(target, ControlType.kMAXMotionPositionControl);
+        // armPivotController.setReference(target, ControlType.kMAXMotionPositionControl);
     }
 
     public Command setArmPivotTarget(double target) {
@@ -226,7 +226,7 @@ public class ScoringSubsystem extends SubsystemBase {
 
     public void reachWristTarget(double target) {
         wristAngleSetPoint = target;
-        wristController.setReference(target, ControlType.kMAXMotionPositionControl);
+        // wristController.setReference(target, ControlType.kMAXMotionPositionControl);
     }
 
     public Command setWristTarget(double target) {

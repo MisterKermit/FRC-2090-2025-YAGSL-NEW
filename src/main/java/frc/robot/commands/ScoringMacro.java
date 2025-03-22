@@ -38,17 +38,25 @@ public class ScoringMacro extends Command {
         switch (state) {
             case Stow:
                 scoring.setArmPivotState(state);
-                scoring.setWristState(state);
+                // scoring.setWristState(state);
                 elevator.setElevatorState(state);
                 break;
         
             case Intake:
-                scoring.reachArmPivotTarget(ArmConstants.intake_angle);
-                // scoring.setArmPivotState(state);
-                // elevator.setElevatorState(state);
-                scoring.reachWristTarget(WristConstants.intake_angle);
-                // scoring.setArmPivotState(state);
+                // scoring.reachArmPivotTarget(ArmConstants.intake_angle);
+                scoring.setArmPivotState(state);
+                elevator.setElevatorState(state);
                 break;
+            case L1:
+                elevator.setElevatorState(state);
+                break;
+            case L2:
+                elevator.setElevatorState(state);
+                break;
+            case L3:
+                elevator.setElevatorState(state);
+                break;
+            
         }
     }
 

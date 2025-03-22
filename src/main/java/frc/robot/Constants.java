@@ -76,7 +76,7 @@ public final class Constants {
     }
 
     public static double stow_angle = 0;
-    public static double intake_angle = 0;
+    public static double intake_angle = -12;
 
   }
 
@@ -91,7 +91,7 @@ public final class Constants {
     }
 
     public static double stow_angle = 0;
-    public static double intake_angle = 50;
+    public static double intake_angle = 10;
 
   }
 
@@ -108,9 +108,10 @@ public final class Constants {
       // https://www.desmos.com/calculator/ocl2iqiu7n
       // Unit: inches
       //tune tommorow
-      CoralIntake(12),
+      Stow(12),
+      CoralIntake(25),
       L1(15),
-      L2(24.899),
+      L2(17),
       L3(40.298),
       AlgaeL2(20.899),
       AlgaeL3(36.899);
@@ -132,9 +133,9 @@ public final class Constants {
     public enum ScoringStates {
       Stow,
       Intake,
-      // L1,
-      // L2,
-      // L3,
+      L1,
+      L2,
+      L3,
       // AlgaeL2,
       // AlgaeL3
     }

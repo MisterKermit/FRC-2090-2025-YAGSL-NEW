@@ -123,11 +123,20 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void setElevatorState(ScoringStates state) {
     switch (state) {
       case Stow:
-        setPosition(ElevationTarget.CoralIntake.getValue());
+        setPosition(ElevationTarget.Stow.getValue());
         break;
     
       case Intake:
         setPosition(ElevationTarget.CoralIntake.getValue());
+        break;
+      case L1:
+        setPosition(ElevationTarget.L1.getValue());
+        break;
+      case L2:
+        setPosition(ElevationTarget.L2.getValue());
+        break;
+      case L3:
+        setPosition(ElevationTarget.L3.getValue());
         break;
     }
   }

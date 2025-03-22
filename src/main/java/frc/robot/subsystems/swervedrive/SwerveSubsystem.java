@@ -103,11 +103,12 @@ public class SwerveSubsystem extends SubsystemBase {
         true,
         0.1); // Correct for skew that gets worse as angular velocity increases. Start with a
               // coefficient of 0.1.
-    swerveDrive.setModuleEncoderAutoSynchronize(true,
+    swerveDrive.setModuleEncoderAutoSynchronize(false,
         1); // Enable if you want to resynchronize your absolute encoders and motor encoders
             // periodically when they are not moving.
     swerveDrive.lockPose();
     swerveDrive.setAutoCenteringModules(true);
+    
     if (visionDriveTest) {
       // setupPhotonVision();
       // Stop the odometry thread if we are using vision that way we can synchronize

@@ -90,7 +90,8 @@ public class RobotContainer {
       () -> driverXbox.getLeftX() * -0.5)
       .withControllerRotationAxis(driverXbox::getRightX)
       .deadband(OperatorConstants.DEADBAND) 
-      .scaleTranslation(slowMode || scoring.returnState() != ScoringStates.Stow ? 1 : 0.5)
+      // .scaleTranslation(slowMode || scoring.returnState() != ScoringStates.Stow ? 0.5 : 1)
+      .scaleTranslation(1)
       .allianceRelativeControl(true);
 
   SwerveInputStream driveSlowAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
@@ -235,9 +236,7 @@ public class RobotContainer {
 
     Trigger YAxisJoystickTrigger = new Trigger(() -> {
       if (MathUtil.applyDeadband(operatorXbox.getLeftY(), 0.01) > 0.01|| 
-          MathUtil.applyDeadband(operatorXbox.getLeftY(), 0.01) < -0.01 ||
-          MathUtil.applyDeadband(operatorXbox.getRightY(), 0.01) > 0.01 || 
-          MathUtil.applyDeadband(operatorXbox.getRightY(), 0.01) < -0.01) {
+          MathUtil.applyDeadband(operatorXbox.getLeftY(), 0.01) < -0.01) {
         return true;
       } else {
         return false;
@@ -248,18 +247,29 @@ public class RobotContainer {
 
     switch (currentRoboState) {
       case NORMAL:
-        operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-        operatorXbox.b().whileTrue(cIntake.runCoralIntake());
-        operatorXbox.x().whileTrue(cIntake.reverseCoralIntake());
-        operatorXbox.leftBumper().whileTrue(aIntake.runAlgaeIntake());
-        operatorXbox.rightBumper().whileTrue(aIntake.reverseAlgaeIntake());
+        driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+        // driverXbox.b().whileTrue(cIntake.runCoralIntake());
+        // operatorXbox.x().whileTrue(cIntake.reverseCoralIntake());
+        // operatorXbox.leftBumper().whileTrue(aIntake.runAlgaeIntake());
+        // operatorXbox.rightBumper().whileTrue(aIntake.reverseAlgaeIntake());
         // driverXbox.b().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Stow));
-        driverXbox.y().onTrue(IntakeSETPOS());
+        // driverXbox.y().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Intake));
+        // driverXbox.a().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.L1));
+        // driverXbox.x().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.L2));
+        // driverXbox.povUp().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.L3));
+
+
+
+        // driverXbox.y().onTrue(IntakeSETPOS());
         // driverXbox.x().onTrue(new ElevatorCommand(elevator,ElevationTarget.L1.getValue()));
-        driverXbox.leftBumper().onTrue(slowModeToggle(slowMode));
+        driverXbox.leftBumper().onTrue(slowModeToggle(slowMode));  
         // operatorXbox.povUp()
         //   .whileTrue(new InstantCommand(() -> hang.setPower(-0.5)))
-        //   .whileFalse(new InstantCommand(() -> hang.setPower(0)));
+        //   .whileFalse(new InstantCommand(() -> hang.setPower(0)));`
+        
+        // YAxisJoystickTrigger
+        // .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-operatorXbox.getLeftY(), 0.01)))
+        // .onFalse(scoring.stopWholeArm());
         driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.MANUAL));
         operatorXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.MANUAL));
         break;
@@ -268,8 +278,7 @@ public class RobotContainer {
         operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL));
         YAxisJoystickTrigger
-        .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-operatorXbox.getLeftY(), 0.01), 
-                                                  () -> MathUtil.applyDeadband(-operatorXbox.getRightY(), 0.01)))
+        .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.01)))
         .onFalse(scoring.stopWholeArm());
         driverXbox.leftBumper().onTrue(slowModeToggle(slowMode));
         break;

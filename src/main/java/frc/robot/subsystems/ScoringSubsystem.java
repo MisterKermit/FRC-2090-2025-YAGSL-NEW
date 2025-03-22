@@ -63,11 +63,12 @@ public class ScoringSubsystem extends SubsystemBase {
         // create configs
         armPivotConfig
                 .inverted(true)
-                .idleMode(IdleMode.kBrake)
+                .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(  80)
                 .voltageCompensation(12);
         armPivotConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                // .pid(kArmP, kArmI, kArmD)
                 .pid(kArmP, kArmI, kArmD)
                 .outputRange(-1, 1)
                 .maxMotion
@@ -81,29 +82,31 @@ public class ScoringSubsystem extends SubsystemBase {
                 // degrees per sec
                 .velocityConversionFactor(1);
 
-        wristConfig
-                .inverted(true)
-                .idleMode(IdleMode.kBrake)
-                .smartCurrentLimit(80)
-                .voltageCompensation(12);
-        wristConfig.closedLoop
-                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(kWristP, kWristI, kWristD)
-                .outputRange(-1, 1).maxMotion
-                .maxVelocity(11000)
-                .maxAcceleration(4000)
-                .allowedClosedLoopError(1)
-                .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
-        wristConfig.encoder
-                // degrees
-                .positionConversionFactor(Constants.WristConstants.rotations_to_degrees)
-                // degrees per sec
-                .velocityConversionFactor(360 / 60);
+        // wristConfig
+        //         .inverted(true)
+        //         .idleMode(IdleMode.kBrake)
+        //         .smartCurrentLimit(80)
+        //         .voltageCompensation(12);
+        // wristConfig.closedLoop
+        //         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        //         // .pid(kWristP, kWristI, kWristD)
+        //         .pidf(kWristP, kWristI, kWristD, 0.01)
+        //         .outputRange(-1, 1).maxMotion
+        //         .maxVelocity(11000)
+        //         .maxAcceleration(4000)
+        //         .allowedClosedLoopError(1)
+        //         .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
+        // wristConfig.encoder
+        //         // degrees
+        //         .positionConversionFactor(Constants.WristConstants.rotations_to_degrees)
+        //         // degrees per sec
+        //         .velocityConversionFactor(360 / 60);
 
 
-        // armPivotEncoder.setPosition(0);
+        armPivotEncoder.setPosition(0);
         // wristEncoder.setPosition(0);
         // set configs for motors
+
         armPivot.configure(armPivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         wrist.configure(wristConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -120,7 +123,7 @@ public class ScoringSubsystem extends SubsystemBase {
 
     public void reachArmPivotTarget(double target) {
         armAngleSetPoint = target;
-        // armPivotController.setReference(target, ControlType.kMAXMotionPositionControl);
+        armPivotController.setReference(target, ControlType.kMAXMotionPositionControl);
     }
 
     public Command setArmPivotTarget(double target) {
@@ -131,10 +134,10 @@ public class ScoringSubsystem extends SubsystemBase {
     public Command setManualArm(DoubleSupplier leftJoystick, DoubleSupplier rightJoystick) {
         return run(() -> {
             wristAngleSetPoint += rightJoystick.getAsDouble();
-            reachWristTarget(wristAngleSetPoint);
-            if (wristAngleSetPoint < 59 && armAngleSetPoint > 45) {
+            // reachWristTarget(wristAngleSetPoint);
+            if (armAngleSetPoint > 45) {
                 armAngleSetPoint = 45;
-            }
+            } 
             armAngleSetPoint += leftJoystick.getAsDouble();
             reachArmPivotTarget(armAngleSetPoint);
         });
@@ -168,13 +171,10 @@ public class ScoringSubsystem extends SubsystemBase {
         });
     }
 
-    public Command setManualArmVoltage(DoubleSupplier leftJoystick, DoubleSupplier rightJoystick) {
+    public Command setManualArmVoltage(DoubleSupplier leftJoystick) {
         return run(() -> {
             double armSpeed = leftJoystick.getAsDouble() * 0.6;
-            double wristSpeed = rightJoystick.getAsDouble() * 0.6;
-            wrist.set(wristSpeed);
             armPivot.set(armSpeed);
-            wristAngleSetPoint = wristEncoder.getPosition();
             armAngleSetPoint = armPivotEncoder.getPosition();
         });
     }
@@ -226,7 +226,7 @@ public class ScoringSubsystem extends SubsystemBase {
 
     public void reachWristTarget(double target) {
         wristAngleSetPoint = target;
-        // wristController.setReference(target, ControlType.kMAXMotionPositionControl);
+        wristController.setReference(target, ControlType.kMAXMotionPositionControl);
     }
 
     public Command setWristTarget(double target) {

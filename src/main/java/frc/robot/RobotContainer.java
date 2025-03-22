@@ -278,7 +278,7 @@ public class RobotContainer {
       case MANUAL:
         operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL));
-        operatorXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL))
+        operatorXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL));
         YAxisJoystickTrigger
         .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.01)))
         .onFalse(scoring.stopWholeArm());
@@ -315,9 +315,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+  public Command getAutonomousCommand(String autoname) {
     // An example command will be run in autonomous
-    return drivebase.getAutonomousCommand("New Auto");
+    return drivebase.getAutonomousCommand(autoname);
   }
 // // command for autonomous
 //   public Command getAutonomousCommand() {

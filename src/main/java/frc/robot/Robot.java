@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.platform.can.AutocacheState;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -24,7 +26,7 @@ public class Robot extends TimedRobot
   private static Robot   instance;
   private        Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  private RobotContainer   m_robotContainer;
 
   private SendableChooser<Command> autoChooser;
 
@@ -128,7 +130,7 @@ public class Robot extends TimedRobot
   public void autonomousInit()
   {
     m_robotContainer.setMotorBrake(true);
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_autonomousCommand = autoChooser.getSelected();
 
     // schedule the autonomous command (example) 
     if (m_autonomousCommand != null)

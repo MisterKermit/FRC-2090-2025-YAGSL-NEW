@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -15,7 +16,7 @@ public class DriveToAprilTag extends Command {
     public DriveToAprilTag(SwerveSubsystem driveTrain, VisionSubsystem limelightSubsystem) {
         this.driveTrain = driveTrain;
         this.limelightSubsystem = limelightSubsystem;
-        addRequirements(driveTrain, limelight);
+        addRequirements(driveTrain, limelightSubsystem);
     }
 
     @Override
@@ -24,7 +25,7 @@ public class DriveToAprilTag extends Command {
         if (visionEstimate != null && visionEstimate.pose != null) {
             Pose2d targetPose = visionEstimate.pose;
 
-            driveToPoseCommand = driveTrain.driveToPoseWithVision(targetPose, limelightSubsystem);
+            // driveToPoseCommand = driveTrain.driveToPoseWithVision(targetPose, limelightSubsystem);
             driveToPoseCommand.initialize();
         } else {
             System.out.println("no tag available for detection");
@@ -43,7 +44,7 @@ public class DriveToAprilTag extends Command {
     @Override
     public void end(boolean isInterrupted) {
         if (driveToPoseCommand != null) {
-            driveToPoseCommand.end(interrupted);
+            // driveToPoseCommand.end(interrupted);
         }
 
     }

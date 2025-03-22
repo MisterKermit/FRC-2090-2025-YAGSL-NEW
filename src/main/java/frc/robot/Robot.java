@@ -55,10 +55,12 @@ public class Robot extends TimedRobot
     autoChooser = new SendableChooser<>();
 
     // default option
-    autoChooser.setDefaultOption("center_preload_blue_auto", 
-        m_robotContainer.getAutonomousCommand("center_preload_blue_auto"));
+    autoChooser.setDefaultOption("default_auto", 
+        m_robotContainer.getAutonomousCommand("default_auto"));
     
     // other options.
+    autoChooser.addOption("center_preload_blue_auto",
+        m_robotContainer.getAutonomousCommand("center_preload_blue_auto"));
     autoChooser.addOption("center_preload_red_auto", 
         m_robotContainer.getAutonomousCommand("center_preload_red_auto"));
     autoChooser.addOption("bottom_preload_blue_auto", 

@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
  * described in the TimedRobot documentation. If you change the name of this class or the package after creating this
@@ -22,6 +25,8 @@ public class Robot extends TimedRobot
   private        Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+
+  private SendableChooser<Command> autoChooser;
 
   private Timer disabledTimer;
 
@@ -44,6 +49,28 @@ public class Robot extends TimedRobot
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    autoChooser = new SendableChooser<>();
+
+    // default option
+    autoChooser.setDefaultOption("center_preload_blue_auto", 
+        m_robotContainer.getAutonomousCommand("center_preload_blue_auto"));
+    
+    // other options.
+    autoChooser.addOption("center_preload_red_auto", 
+        m_robotContainer.getAutonomousCommand("center_preload_red_auto"));
+    autoChooser.addOption("bottom_preload_blue_auto", 
+        m_robotContainer.getAutonomousCommand("bottom_preload_blue_auto"));
+    autoChooser.addOption("bottom_preload_red_auto", 
+        m_robotContainer.getAutonomousCommand("bottom_preload_red_auto"));
+    autoChooser.addOption("top_preload_blue_auto", 
+        m_robotContainer.getAutonomousCommand("top_preload_blue_auto"));
+    autoChooser.addOption("top_preload_red_auto", 
+        m_robotContainer.getAutonomousCommand("top_preload_red_auto"));
+
+    // smartdashboard selection
+    SmartDashboard.putData("Auto Mode", autoChooser);
+
 
     // Create a timer to disable motor brake a few seconds after disable.  This will let the robot stop
     // immediately when disabled, but then also let it be pushed more 
@@ -103,7 +130,7 @@ public class Robot extends TimedRobot
     m_robotContainer.setMotorBrake(true);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    // schedule the autonomous command (example)
+    // schedule the autonomous command (example) 
     if (m_autonomousCommand != null)
     {
       m_autonomousCommand.schedule();

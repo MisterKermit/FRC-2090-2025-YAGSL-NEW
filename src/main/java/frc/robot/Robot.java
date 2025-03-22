@@ -59,18 +59,8 @@ public class Robot extends TimedRobot
         m_robotContainer.getAutonomousCommand("default_auto"));
     
     // other options.
-    autoChooser.addOption("center_preload_blue_auto",
-        m_robotContainer.getAutonomousCommand("center_preload_blue_auto"));
-    autoChooser.addOption("center_preload_red_auto", 
-        m_robotContainer.getAutonomousCommand("center_preload_red_auto"));
-    autoChooser.addOption("bottom_preload_blue_auto", 
-        m_robotContainer.getAutonomousCommand("bottom_preload_blue_auto"));
-    autoChooser.addOption("bottom_preload_red_auto", 
-        m_robotContainer.getAutonomousCommand("bottom_preload_red_auto"));
-    autoChooser.addOption("top_preload_blue_auto", 
-        m_robotContainer.getAutonomousCommand("top_preload_blue_auto"));
-    autoChooser.addOption("top_preload_red_auto", 
-        m_robotContainer.getAutonomousCommand("top_preload_red_auto"));
+    autoChooser.addOption("center_blue_auto",
+        m_robotContainer.getAutonomousCommand("center_blue_auto"));
 
     // smartdashboard selection
     SmartDashboard.putData("Auto Mode", autoChooser);

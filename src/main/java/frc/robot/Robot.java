@@ -61,6 +61,8 @@ public class Robot extends TimedRobot
     // other options.
     autoChooser.addOption("center_blue_auto",
         m_robotContainer.getAutonomousCommand("center_blue_auto"));
+    autoChooser.addOption("center_red_auto",
+        m_robotContainer.getAutonomousCommand("center_red_auto"));
 
     // smartdashboard selection
     SmartDashboard.putData("Auto Mode", autoChooser);

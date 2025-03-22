@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -65,15 +67,15 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve/falcon"));
 
-  private final ElevatorSubsystem elevator = new ElevatorSubsystem();
+  // private final ElevatorSubsystem elevator = new ElevatorSubsystem();
 
-  private final ScoringSubsystem scoring = new ScoringSubsystem();
+  // private final ScoringSubsystem scoring = new ScoringSubsystem();
 
-  private final AlgaeIntake aIntake = new AlgaeIntake();
+  // private final AlgaeIntake aIntake = new AlgaeIntake();
 
-  private final CoralIntake cIntake = new CoralIntake();
+  // private final CoralIntake cIntake = new CoralIntake();
 
-  private final VisionSubsystem vision = new VisionSubsystem("limelight");
+  // private final VisionSubsystem vision = new VisionSubsystem("limelight");
 
   // private final Hang hang = new Hang();
 
@@ -81,6 +83,7 @@ public class RobotContainer {
 
   private static boolean slowMode = false;
 
+  private SendableChooser<Command> autoChooser = new SendableChooser<>();
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
    * by angular velocity.
@@ -146,9 +149,9 @@ public class RobotContainer {
       .translationHeadingOffset(Rotation2d.fromDegrees(
           0));
 
-  public Command IntakeSETPOS() {
-    return scoring.setArmPivotStateCommand(ScoringStates.Intake).andThen(new ElevatorCommand(elevator, ElevationTarget.CoralIntake.getValue()));
-  }
+  // public Command IntakeSETPOS() {
+  //   return scoring.setArmPivotStateCommand(ScoringStates.Intake).andThen(new ElevatorCommand(elevator, ElevationTarget.CoralIntake.getValue()));
+  // }
 
   public Command slowModeToggle(boolean isSlow) {
     return new InstantCommand(() -> slowMode = isSlow ? !isSlow : isSlow);
@@ -189,7 +192,28 @@ public class RobotContainer {
 //         Commands.runOnce(() -> scoring.setWristState(ScoringConstants.ScoringStates.L3))
 //         )
 //     );
+  autoChooser = new SendableChooser<>();
 
+    // default option
+    autoChooser.setDefaultOption("default_auto", 
+        pullAutonomousCommand("default_auto"));
+    
+    // other options.
+    autoChooser.addOption("center_preload_blue_auto",
+        pullAutonomousCommand("center_preload_blue_auto"));
+    autoChooser.addOption("center_preload_red_auto", 
+        pullAutonomousCommand("center_preload_red_auto"));
+    autoChooser.addOption("bottom_preload_blue_auto", 
+        pullAutonomousCommand("bottom_preload_blue_auto"));
+    autoChooser.addOption("bottom_preload_red_auto", 
+        pullAutonomousCommand("bottom_preload_red_auto"));
+    autoChooser.addOption("top_preload_blue_auto", 
+        pullAutonomousCommand("top_preload_blue_auto"));
+    autoChooser.addOption("top_preload_red_auto", 
+        pullAutonomousCommand("top_preload_red_auto"));
+
+    // smartdashboard selection
+    SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
   /**
@@ -215,7 +239,7 @@ public class RobotContainer {
     // Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
     // Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
     // Command driveSetpointGenKeyboard = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleKeyboard);
-    Command ManualControlElevator = new ManualElevationCommand(elevator, driverXbox);
+    // Command ManualControlElevator = new ManualElevationCommand(elevator, driverXbox);
     // Command ManualArm = arm.manualArm(driverXbox);
     // Command HangSequence = hang.hangCommand(driverXbox);
 
@@ -244,7 +268,7 @@ public class RobotContainer {
       }
     });
 
-    driverXbox.x().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Intake));
+    // driverXbox.x().onTrue(new ScoringMacro(scoring, elevator, ScoringStates.Intake));
 
     switch (currentRoboState) {
       case NORMAL:
@@ -279,9 +303,9 @@ public class RobotContainer {
         operatorXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL));
         operatorXbox.back().onTrue(new InstantCommand(() -> currentRoboState = RobotStates.NORMAL));
-        YAxisJoystickTrigger
-        .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.01)))
-        .onFalse(scoring.stopWholeArm());
+        // YAxisJoystickTrigger
+        // .onTrue(scoring.setManualArmVoltage(() -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.01)))
+        // .onFalse(scoring.stopWholeArm());
         driverXbox.leftBumper().onTrue(slowModeToggle(slowMode));
         break;
     }
@@ -315,9 +339,13 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand(String autoname) {
+  public Command pullAutonomousCommand(String autoname) {
     // An example command will be run in autonomous
     return drivebase.getAutonomousCommand(autoname);
+  }
+
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
   }
 // // command for autonomous
 //   public Command getAutonomousCommand() {

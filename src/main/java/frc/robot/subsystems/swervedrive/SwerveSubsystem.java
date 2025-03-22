@@ -93,7 +93,7 @@ public class SwerveSubsystem extends SubsystemBase {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    swerveDrive.useExternalFeedbackSensor(); // Set the absolute encoder to be used over the internal encoder and push
+    // swerveDrive.useExternalFeedbackSensor(); // Set the absolute encoder to be used over the internal encoder and push
                                              // the offsets onto it. Throws warning if not possible
     swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via
                                              // angle.

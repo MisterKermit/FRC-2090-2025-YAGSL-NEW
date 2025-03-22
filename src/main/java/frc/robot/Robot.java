@@ -28,8 +28,6 @@ public class Robot extends TimedRobot
 
   private RobotContainer   m_robotContainer;
 
-  private SendableChooser<Command> autoChooser;
-
   private Timer disabledTimer;
 
   public Robot()
@@ -52,20 +50,9 @@ public class Robot extends TimedRobot
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
-    autoChooser = new SendableChooser<>();
-
-    // default option
-    autoChooser.setDefaultOption("default_auto", 
-        m_robotContainer.getAutonomousCommand("default_auto"));
     
     // other options.
-    autoChooser.addOption("center_blue_auto",
-        m_robotContainer.getAutonomousCommand("center_blue_auto"));
-    autoChooser.addOption("center_red_auto",
-        m_robotContainer.getAutonomousCommand("center_red_auto"));
-
-    // smartdashboard selection
-    SmartDashboard.putData("Auto Mode", autoChooser);
+    
 
 
     // Create a timer to disable motor brake a few seconds after disable.  This will let the robot stop
@@ -124,7 +111,7 @@ public class Robot extends TimedRobot
   public void autonomousInit()
   {
     m_robotContainer.setMotorBrake(true);
-    m_autonomousCommand = autoChooser.getSelected();
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example) 
     if (m_autonomousCommand != null)

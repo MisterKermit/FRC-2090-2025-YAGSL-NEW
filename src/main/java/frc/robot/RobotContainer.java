@@ -195,22 +195,13 @@ public class RobotContainer {
   autoChooser = new SendableChooser<>();
 
     // default option
-    autoChooser.setDefaultOption("default_auto", 
-        pullAutonomousCommand("default_auto"));
+
     
     // other options.
-    autoChooser.addOption("center_preload_blue_auto",
-        pullAutonomousCommand("center_preload_blue_auto"));
-    autoChooser.addOption("center_preload_red_auto", 
-        pullAutonomousCommand("center_preload_red_auto"));
-    autoChooser.addOption("bottom_preload_blue_auto", 
-        pullAutonomousCommand("bottom_preload_blue_auto"));
-    autoChooser.addOption("bottom_preload_red_auto", 
-        pullAutonomousCommand("bottom_preload_red_auto"));
-    autoChooser.addOption("top_preload_blue_auto", 
-        pullAutonomousCommand("top_preload_blue_auto"));
-    autoChooser.addOption("top_preload_red_auto", 
-        pullAutonomousCommand("top_preload_red_auto"));
+    autoChooser.setDefaultOption("center_blue_auto",
+        pullAutonomousCommand("center_blue_auto"));
+    autoChooser.addOption("center_red_auto",
+        pullAutonomousCommand("center_red_auto"));
 
     // smartdashboard selection
     SmartDashboard.putData("Auto Mode", autoChooser);
